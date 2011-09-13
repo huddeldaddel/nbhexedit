@@ -31,7 +31,7 @@ import java.util.EventObject;
 
 /**
  * Occurs when the cell selection within the hex editor becomes changed.
- * 
+ *
  * @author PAX
  * @version 1.0
  */
@@ -62,7 +62,7 @@ public class SelectionChangedEvent extends EventObject {
 
 	/**
 	 * Constructor.
-	 * 
+	 *
 	 * @param source The instance which creates this event.
 	 * @param previousSelecStart The previous selection start index.
 	 * @param previousSelecEnd The previous selection end index.
@@ -110,14 +110,18 @@ public class SelectionChangedEvent extends EventObject {
 		return this.previousSelecStart;
 	}
 
-
+    @Override
 	public String toString() {
-		StringBuffer result = new StringBuffer("Old selection: [");
-		result.append(getPreviousSelecStart()).append(", ");
-		result.append(getPreviousSelecEnd()).append("]; New selection: [");
-		result.append(getNewSelecStart()).append(", ");
-		result.append(getNewSelecEnd()).append(']');
-		return result.toString();
+		return new StringBuilder().append("Old selection: [")
+                                  .append(getPreviousSelecStart())
+                                  .append(", ")
+                                  .append(getPreviousSelecEnd())
+                                  .append("]; New selection: [")
+                                  .append(getNewSelecStart())
+                                  .append(", ")
+                                  .append(getNewSelecEnd())
+                                  .append(']')
+                                  .toString();
 	}
 
 

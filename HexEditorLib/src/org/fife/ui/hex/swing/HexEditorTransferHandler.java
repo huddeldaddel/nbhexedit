@@ -1,3 +1,29 @@
+/*
+ * Copyright (c) 2011 Robert Futrell
+ * All rights reserved.
+ *
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions are met:
+ *     * Redistributions of source code must retain the above copyright
+ *       notice, this list of conditions and the following disclaimer.
+ *     * Redistributions in binary form must reproduce the above copyright
+ *       notice, this list of conditions and the following disclaimer in the
+ *       documentation and/or other materials provided with the distribution.
+ *     * Neither the name "HexEditor" nor the names of its contributors may
+ *       be used to endorse or promote products derived from this software
+ *       without specific prior written permission.
+ *
+ * THIS SOFTWARE IS PROVIDED BY ''AS IS'' AND ANY EXPRESS OR IMPLIED
+ * WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
+ * MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO
+ * EVENT SHALL THE CONTRIBUTORS TO THIS SOFTWARE BE LIABLE FOR ANY DIRECT,
+ * INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+ * (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+ * LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
+ * ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+ * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+ * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ */
 package org.fife.ui.hex.swing;
 
 import java.awt.datatransfer.DataFlavor;
@@ -19,6 +45,7 @@ class HexEditorTransferHandler extends TransferHandler {
 	private static final long serialVersionUID = 1L;
 
 
+    @Override
 	public boolean canImport(JComponent comp, DataFlavor[] flavors) {
 		HexEditor editor = (HexEditor)comp;
 		if (!editor.isEnabled()) {
@@ -28,6 +55,7 @@ class HexEditorTransferHandler extends TransferHandler {
 	}
 
 
+    @Override
 	protected Transferable createTransferable(JComponent c) {
 		HexEditor e = (HexEditor)c;
 		int start = e.getSmallestSelectionIndex();
@@ -41,6 +69,7 @@ class HexEditorTransferHandler extends TransferHandler {
 	}
 
 
+    @Override
 	protected void exportDone(JComponent source, Transferable data, int action){
 		if (action==MOVE) {
 			ByteArrayTransferable bat = (ByteArrayTransferable)data;
@@ -68,6 +97,7 @@ class HexEditorTransferHandler extends TransferHandler {
 	 * @param c The <code>HexEditor</code>.
 	 * @return The permitted operations.
 	 */
+    @Override
 	public int getSourceActions(JComponent c) {
 		HexEditor e = (HexEditor)c;
 		return e.isEnabled() ? COPY_OR_MOVE : COPY;
@@ -81,12 +111,10 @@ class HexEditorTransferHandler extends TransferHandler {
 	 * @param t The data to be imported.
 	 * @return Whether the data was successfully imported.
 	 */
+    @Override
 	public boolean importData(JComponent c, Transferable t) {
-
-		HexEditor e = (HexEditor)c;
-		boolean imported = false;
-
-		DataFlavor flavor = getImportFlavor(t.getTransferDataFlavors(), e);
+		final HexEditor e = (HexEditor)c;
+		final DataFlavor flavor = getImportFlavor(t.getTransferDataFlavors(), e);
 		if (flavor!=null) {
 			try {
 				Object data = t.getTransferData(flavor);
@@ -102,8 +130,7 @@ class HexEditorTransferHandler extends TransferHandler {
 			}
 		}
 
-		return imported;
-
+		return false;
 	}
 
 

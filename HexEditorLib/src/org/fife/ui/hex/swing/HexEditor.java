@@ -27,7 +27,14 @@
 package org.fife.ui.hex.swing;
 
 import java.awt.*;
+import java.awt.datatransfer.Clipboard;
+import java.awt.datatransfer.DataFlavor;
+import java.awt.datatransfer.Transferable;
 import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
 import java.io.*;
 import java.util.ResourceBundle;
 import javax.swing.*;
@@ -56,34 +63,27 @@ public class HexEditor extends JScrollPane {
 	private static final long serialVersionUID = 1L;
 
 	/**
-	 * Property fired when the alternating of column background colors is
-	 * toggled.
+	 * Property fired when the alternating of column background colors is toggled.
 	 */
 	public static final String PROPERTY_ALTERNATE_COLUMN_BG = "alternateColBG";
 
 	/**
-	 * Property fired when the alternating of row background colors is
-	 * toggled.
+	 * Property fired when the alternating of row background colors is toggled.
 	 */
 	public static final String PROPERTY_ALTERNATE_ROW_BG = "alternateRowBG";
 
 	/**
-	 * Property fired when the highlight color of the ascii dump column
-	 * is changed.
+	 * Property fired when the highlight color of the ascii dump column is changed.
 	 */
-	public static final String PROPERTY_ASCII_DUMP_HIGHLIGHT_COLOR =
-												"asciiDumpHighlightColor";
+	public static final String PROPERTY_ASCII_DUMP_HIGHLIGHT_COLOR = "asciiDumpHighlightColor";
 
 	/**
-	 * Property fired when the visibility of the highlight in the "ascii
-	 * dump" column is toggled.
+	 * Property fired when the visibility of the highlight in the "ascii dump" column is toggled.
 	 */
-	public static final String PROPERTY_HIGHLIGHT_ASCII_DUMP =
-												"highlightAsciiDump";
+	public static final String PROPERTY_HIGHLIGHT_ASCII_DUMP = "highlightAsciiDump";
 
 	/**
-	 * Property fired when the padding of low bytes (<code>0 - 15</code>)
-	 * is toggled.
+	 * Property fired when the padding of low bytes (<code>0 - 15</code>) is toggled.
 	 */
 	public static final String PROPERTY_PAD_LOW_BYTES = "padLowBytes";
 
@@ -92,17 +92,17 @@ public class HexEditor extends JScrollPane {
 	 */
 	public static final String PROPERTY_SHOW_GRID = "showGrid";
 
-	private HexTable table;
+    private final JPopupMenu contextMenu;
+	private final HexTable table;
 	private boolean alternateRowBG;
 	private boolean alternateColumnBG;
 	private boolean highlightSelectionInAsciiDump;
 	private Color highlightSelectionInAsciiDumpColor;
 	private boolean padLowBytes;
 
-	private static final TransferHandler DEFAULT_TRANSFER_HANDLER =
-							new HexEditorTransferHandler();
+	private static final TransferHandler DEFAULT_TRANSFER_HANDLER = new HexEditorTransferHandler();
 
-	static final int DUMP_COLUMN_WIDTH		= 200;
+	static final int DUMP_COLUMN_WIDTH = 200;
 	private static final String MSG = "org.fife.ui.hex.HexEditor";
 
 
@@ -115,10 +115,11 @@ public class HexEditor extends JScrollPane {
 
 		HexTableModel model = new HexTableModel(this, msg);
 		table = new HexTable(this, model);
+        table.addMouseListener(new MouseHandler());
+        contextMenu = createContextMenu();
 		setViewportView(table);
 		setShowRowHeader(true);
-
-		setAlternateRowBG(false);
+		setAlternateRowBG(true);
 		setAlternateColumnBG(false);
 		setHighlightSelectionInAsciiDump(true);
 		setHighlightSelectionInAsciiDumpColor(new Color(255,255,192));
@@ -127,7 +128,6 @@ public class HexEditor extends JScrollPane {
 		setTransferHandler(DEFAULT_TRANSFER_HANDLER);
 
 	}
-
 
 	/**
 	 * Adds a hex editor listener to this editor.
@@ -141,9 +141,8 @@ public class HexEditor extends JScrollPane {
 
 
 	/**
-	 * Registers a prospect who is interested when the text selection from the
-	 * hex editor becomes changed.
-	 * 
+	 * Registers a prospect who is interested when the text selection from the hex editor becomes changed.
+	 *
 	 * @param l The concerning listener.
 	 * @see #removeSelectionChangedListener(SelectionChangedListener)
 	 */
@@ -153,14 +152,12 @@ public class HexEditor extends JScrollPane {
 
 
 	/**
-	 * Returns the offset into the bytes being edited represented at the
-	 * specified cell in the table, if any.
+	 * Returns the offset into the bytes being edited represented at the specified cell in the table, if any.
 	 *
 	 * @param row The row in the table.
 	 * @param col The column in the table.
-	 * @return The offset into the byte array, or <code>-1</code> if the
-	 *         cell does not represent part of the byte array (such as the
-	 *         tailing "ascii dump" column's cells).
+	 * @return The offset into the byte array, or <code>-1</code> if the cell does not represent part of the byte array
+     *         (such as the tailing "ascii dump" column's cells).
 	 * @see #offsetToCell(int)
 	 */
 	public int cellToOffset(int row, int col) {
@@ -286,11 +283,9 @@ public class HexEditor extends JScrollPane {
 
 
 	/**
-	 * Returns whether the selected bytes should also appear selected in
-	 * the "ascii dump" column.
+	 * Returns whether the selected bytes should also appear selected in the "ascii dump" column.
 	 *
-	 * @return Whether the selected bytes should also be selected in the
-	 *         "ascii dump" column.
+	 * @return Whether the selected bytes should also be selected in the "ascii dump" column.
 	 * @see #setHighlightSelectionInAsciiDump(boolean)
 	 */
 	public boolean getHighlightSelectionInAsciiDump() {
@@ -299,8 +294,7 @@ public class HexEditor extends JScrollPane {
 
 
 	/**
-	 * Returns the color used to highlight the selected bytes in the
-	 * "ascii dump" column.
+	 * Returns the color used to highlight the selected bytes in the "ascii dump" column.
 	 *
 	 * @return The color used.
 	 * @see #setHighlightSelectionInAsciiDumpColor(Color)
@@ -323,12 +317,11 @@ public class HexEditor extends JScrollPane {
 
 
 	/**
-	 * Returns whether bytes that can be displayed as a single char
-	 * (i.e. <code>0 - 15</code>) are prepended with a "<code>0</code>"
-	 * char to make them two characters wide in the display.
+	 * Returns whether bytes that can be displayed as a single char (i.e. <code>0 - 15</code>) are prepended with a
+     * "<code>0</code>" char to make them two characters wide in the display.
 	 *
-	 * @return Whether bytes with one-character hex representations
-	 *         will be prepended with a "<code>0</code>" in the display.
+	 * @return Whether bytes with one-character hex representations will be prepended with a "<code>0</code>" in the
+     *         display.
 	 * @see #setPadLowBytes(boolean)
 	 */
 	public boolean getPadLowBytes() {
@@ -358,20 +351,17 @@ public class HexEditor extends JScrollPane {
 
 
 	private void invokeAction(Action a) {
-		a.actionPerformed(new ActionEvent(this, ActionEvent.ACTION_PERFORMED,
-								(String)a.getValue(Action.NAME),
-								EventQueue.getMostRecentEventTime(),
-								0));
+		a.actionPerformed(new ActionEvent(this, ActionEvent.ACTION_PERFORMED, (String)a.getValue(Action.NAME),
+						  EventQueue.getMostRecentEventTime(), 0));
 	}
 
 
 	/**
-	 * Returns the cell representing the specified offset into the hex
-	 * document.
+	 * Returns the cell representing the specified offset into the hex document.
 	 *
 	 * @param offset The offset into the document.
-	 * @return The cell, in the form <code>(row, col)</code>.  If the
-	 *         specified offset is invalid, <code>(-1, -1)</code> is returned.
+	 * @return The cell, in the form <code>(row, col)</code>.  If the specified offset is invalid,
+     *         <code>(-1, -1)</code> is returned.
 	 * @see #cellToOffset(int, int)
 	 */
 	public Point offsetToCell(int offset) {
@@ -380,8 +370,7 @@ public class HexEditor extends JScrollPane {
 
 
 	/**
-	 * Sets the contents in the hex editor to the contents of the specified
-	 * file.
+	 * Sets the contents in the hex editor to the contents of the specified file.
 	 *
 	 * @param fileName The name of the file to open.
 	 * @throws IOException If an IO error occurs.
@@ -392,8 +381,7 @@ public class HexEditor extends JScrollPane {
 
 
 	/**
-	 * Sets the contents in the hex editor to the contents of the specified
-	 * input stream.
+	 * Sets the contents in the hex editor to the contents of the specified input stream.
 	 *
 	 * @param in An input stream.
 	 * @throws IOException If an IO error occurs.
@@ -404,8 +392,7 @@ public class HexEditor extends JScrollPane {
 
 
 	/**
-	 * "Pastes" the bytes in the clipboard into the current selection in
-	 * the hex editor.
+	 * "Pastes" the bytes in the clipboard into the current selection in the hex editor.
 	 *
 	 * @see #copy()
 	 * @see #cut()
@@ -452,9 +439,9 @@ public class HexEditor extends JScrollPane {
 
 
 	/**
-	 * Removes a listener who isn't any longer interested whether the text
-	 * selection from the hex editor becomes changed.
-	 * 
+	 * Removes a listener who isn't any longer interested whether the text selection from the hex editor becomes
+     * changed.
+	 *
 	 * @param l The concerning previous prospect.
 	 * @see #addSelectionChangedListener(SelectionChangedListener)
 	 */
@@ -484,12 +471,10 @@ public class HexEditor extends JScrollPane {
 
 
 	/**
-	 * Replaces the currently selected bytes (if >=1) with the specified
-	 * new bytes.
+	 * Replaces the currently selected bytes (if >=1) with the specified new bytes.
 	 *
-	 * @param bytes The new bytes.  If this is <code>null</code> or an empty
-	 *        array, calling this method simply removes the currently
-	 *        selected bytes.
+	 * @param bytes The new bytes. If this is <code>null</code> or an empty array, calling this method simply removes
+     *              the currently selected bytes.
 	 * @see #replaceBytes(int, int, byte[])
 	 */
 	public void replaceSelection(byte[] bytes) {
@@ -500,9 +485,8 @@ public class HexEditor extends JScrollPane {
 
 
 	/**
-	 * Sets whether the column color should alternate in the hex editor.
-	 * This method fires a property change event of type
-	 * {@link #PROPERTY_ALTERNATE_COLUMN_BG}.
+	 * Sets whether the column color should alternate in the hex editor. This method fires a property change event of
+     * type {@link #PROPERTY_ALTERNATE_COLUMN_BG}.
 	 *
 	 * @param alternate Whether the column color should alternate.
 	 * @see #getAlternateColumnBG()
@@ -512,15 +496,13 @@ public class HexEditor extends JScrollPane {
 		if (alternate!=alternateColumnBG) {
 			this.alternateColumnBG = alternate;
 			table.repaint();
-			firePropertyChange(PROPERTY_ALTERNATE_COLUMN_BG,
-									!alternate, alternate);
+			firePropertyChange(PROPERTY_ALTERNATE_COLUMN_BG, !alternate, alternate);
 		}
 	}
 
 
 	/**
-	 * Sets whether the row color should alternate in the hex editor.  This
-	 * method fires a property change event of type
+	 * Sets whether the row color should alternate in the hex editor.  This method fires a property change event of type
 	 * {@link #PROPERTY_ALTERNATE_ROW_BG}.
 	 *
 	 * @param alternate Whether the row color should alternate.
@@ -537,12 +519,10 @@ public class HexEditor extends JScrollPane {
 
 
 	/**
-	 * Sets whether the selected bytes should also appear selected in the
-	 * "ascii dump" column.  This method fires a property change event of
-	 * type {@link #PROPERTY_HIGHLIGHT_ASCII_DUMP}.
+	 * Sets whether the selected bytes should also appear selected in the "ascii dump" column. This method fires a
+     * property change event of type {@link #PROPERTY_HIGHLIGHT_ASCII_DUMP}.
 	 *
-	 * @param highlight Whether the selected bytes should also appear
-	 *        selected in the "ascii dump" column.
+	 * @param highlight Whether the selected bytes should also appear selected in the "ascii dump" column.
 	 * @see #getHighlightSelectionInAsciiDump()
 	 * @see #setHighlightSelectionInAsciiDumpColor(Color)
 	 */
@@ -550,17 +530,15 @@ public class HexEditor extends JScrollPane {
 		if (highlight!=highlightSelectionInAsciiDump) {
 			highlightSelectionInAsciiDump = highlight;
 			table.repaint();
-			firePropertyChange(PROPERTY_HIGHLIGHT_ASCII_DUMP,
-								!highlight, highlight);
+			firePropertyChange(PROPERTY_HIGHLIGHT_ASCII_DUMP, !highlight, highlight);
 		}
 	}
 
 
 	/**
-	 * Sets what color should be used for the "ascii dump" selection.
-	 * This method fires a property change event of type
+	 * Sets what color should be used for the "ascii dump" selection. This method fires a property change event of type
 	 * {@link #PROPERTY_ASCII_DUMP_HIGHLIGHT_COLOR}.
-	 * 
+	 *
 	 * @param c The color to use.
 	 * @see #getHighlightSelectionInAsciiDumpColor()
 	 * @see #setHighlightSelectionInAsciiDump(boolean)
@@ -574,12 +552,16 @@ public class HexEditor extends JScrollPane {
 		}
 	}
 
+    @Override
+    public void setEnabled(boolean enabled) {
+        super.setEnabled(enabled);
+        table.setEnabled(enabled);
+    }
 
 	/**
-	 * Sets whether bytes that can be displayed as a single char
-	 * (i.e. <code>0 - 15</code>) are prepended with a "<code>0</code>"
-	 * char to make them two characters wide in the display.  This method
-	 * fires a property change event of type {@link #PROPERTY_PAD_LOW_BYTES}.
+	 * Sets whether bytes that can be displayed as a single char (i.e. <code>0 - 15</code>) are prepended with a
+     * "<code>0</code>" char to make them two characters wide in the display. This method fires a property change event
+     * of type {@link #PROPERTY_PAD_LOW_BYTES}.
 	 *
 	 * @param pad Whether to pad such bytes in the display.
 	 * @see #getPadLowBytes()
@@ -619,8 +601,8 @@ public class HexEditor extends JScrollPane {
 
 
 	/**
-	 * Toggles whether the table's grid lines are visible.  This method
-	 * fires a property change event of type {@link #PROPERTY_SHOW_GRID}.
+	 * Toggles whether the table's grid lines are visible. This method fires a property change event of type
+     * {@link #PROPERTY_SHOW_GRID}.
 	 *
 	 * @param show Whether grid lines are visible.
 	 */
@@ -654,5 +636,55 @@ public class HexEditor extends JScrollPane {
 		return table.undo();
 	}
 
+
+    private JPopupMenu createContextMenu() {
+        final JPopupMenu result = new JPopupMenu();
+
+        final JMenuItem cutItem = new JMenuItem("Cut");
+        cutItem.setEnabled(getByteCount() > 0);
+        cutItem.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                cut();
+                result.setVisible(false);
+            }
+        });
+        result.add(cutItem);
+
+        final JMenuItem copyItem = new JMenuItem("Copy");
+        copyItem.setEnabled(getByteCount() > 0);
+        copyItem.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                copy();
+                result.setVisible(false);
+            }
+        });
+        result.add(copyItem);
+
+        final JMenuItem pasteItem = new JMenuItem("Paste");
+        final Clipboard clipboard = Toolkit.getDefaultToolkit().getSystemClipboard();
+        final Transferable transfer = clipboard.getContents(null);
+        pasteItem.setEnabled(transfer.isDataFlavorSupported(DataFlavor.stringFlavor));
+        pasteItem.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                paste();
+                result.setVisible(false);
+            }
+        });
+        result.add(pasteItem);
+
+        return result;
+    }
+
+    private class MouseHandler extends MouseAdapter {
+
+        @Override
+        public void mouseClicked(MouseEvent e) {
+            if(e.getButton() == MouseEvent.BUTTON3)
+                contextMenu.show(table, e.getX(), e.getY());
+        }
+    }
 
 }

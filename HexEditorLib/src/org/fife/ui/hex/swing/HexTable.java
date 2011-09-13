@@ -109,24 +109,23 @@ class HexTable extends JTable {
 			TableColumn column = getColumnModel().getColumn(i);
 			if (i<16) {
 				column.setPreferredWidth(w);
-			}
-			else {
+			} else {
 				column.setPreferredWidth(HexEditor.DUMP_COLUMN_WIDTH);
+                final DefaultCellEditor editor = new DefaultCellEditor(new JTextField());
+                column.setCellEditor(editor);
 			}
 		}
 
-		setPreferredScrollableViewportSize(
-				new Dimension(w*16+HexEditor.DUMP_COLUMN_WIDTH, 25*getRowHeight()));
+		setPreferredScrollableViewportSize(new Dimension(w*16+HexEditor.DUMP_COLUMN_WIDTH, 25*getRowHeight()));
 
 		anchorSelectionIndex = leadSelectionIndex = 0;
-
 	}
 
 
 	/**
 	 * Registers a prospect who is interested when the text selection from the
 	 * hex editor becomes changed.
-	 * 
+	 *
 	 * @param l The concerning listener.
 	 * @see #removeSelectionChangedListener(SelectionChangedListener)
 	 */
@@ -139,7 +138,7 @@ class HexTable extends JTable {
 	 * Returns the column for the cell containing data that is the closest
 	 * to the specified cell.  This is used when, for example, the user clicks
 	 * on an "empty" cell in the last row of the table.
-	 *  
+	 *
 	 * @param row The row of the cell clicked on.
 	 * @param col The column of the cell clicked on.
 	 * @return The column of the closest cell containing data.
@@ -167,18 +166,16 @@ class HexTable extends JTable {
 	 *
 	 * @param row The row in the table.
 	 * @param col The column in the table.
-	 * @return The offset into the byte array, or <code>-1</code> if the
-	 *         cell does not represent part of the byte array (such as the
-	 *         tailing "ascii dump" column's cells).
+	 * @return The offset into the byte array, or <code>-1</code> if the cell does not represent part of the byte array
+     *         (such as the tailing "ascii dump" column's cells).
 	 * @see #offsetToCell(int)
 	 */
 	public int cellToOffset(int row, int col) {
-		// Check row and column individually to prevent them being invalid
-		// values but still pointing to a valid offset in the buffer.
-		if (row<0 || row>=getRowCount() ||
-				col<0 || col>15) { // Don't include last column (ascii dump)
+		// Check row and column individually to prevent them being invalid values but still pointing to a valid offset
+        // in the buffer.
+		if(row<0 || row>=getRowCount() || col<0 || col>15) // Don't include last column (ascii dump)
 			return -1;
-		}
+
 		int offs = row*16 + col;
 		return (offs>=0 && offs<model.getByteCount()) ? offs : -1;
 	}
@@ -195,13 +192,13 @@ class HexTable extends JTable {
 	 * @see #setSelectedRows(int, int)
 	 * @see #setSelectionByOffsets(int, int)
 	 */
-	public void changeSelection(int row, int col, boolean toggle,
-								boolean extend) {
-	    
+    @Override
+	public void changeSelection(int row, int col, boolean toggle, boolean extend) {
+
 	    // remind previous selection range
 		int prevSmallest = getSmallestSelectionIndex();
 		int prevLargest = getLargestSelectionIndex();
-	    
+
 		// Don't allow the user to select the "ascii dump" or any
 		// empty cells in the last row of the table.
 		col = adjustColumn(row, col);
@@ -214,8 +211,7 @@ class HexTable extends JTable {
 
 		if (extend) {
 			leadSelectionIndex = cellToOffset(row, col);
-		}
-		else {
+		} else {
 			anchorSelectionIndex = leadSelectionIndex = cellToOffset(row, col);
 		}
 
@@ -256,11 +252,11 @@ class HexTable extends JTable {
 	 * Clears the selection.  The "lead" of the selection is set back to the
 	 * position of the "anchor."
 	 */
+    @Override
 	public void clearSelection() {
 		if (anchorSelectionIndex>-1) { // Always true unless an error
 			leadSelectionIndex = anchorSelectionIndex;
-		}
-		else {
+		} else {
 			anchorSelectionIndex = leadSelectionIndex = 0;
 		}
 		repaintSelection();
@@ -283,7 +279,7 @@ class HexTable extends JTable {
 
 	/**
 	 * Notifies any listeners that the selection has changed.
-	 * 
+	 *
 	 * @see #addSelectionChangedListener(SelectionChangedListener)
 	 * @see #removeSelectionChangedListener(SelectionChangedListener)
 	 * @param e Contains proper information.
@@ -355,11 +351,13 @@ class HexTable extends JTable {
 	}
 
 
+    @Override
 	public boolean isCellEditable(int row, int col) {
-		return cellToOffset(row, col)>-1;
+		return isEnabled() && ((col > 15) || cellToOffset(row, col) > -1);
 	}
 
 
+    @Override
 	public boolean isCellSelected(int row, int col) {
 		int offset = cellToOffset(row, col);
 		if (offset==-1) { // "Ascii dump" column
@@ -414,17 +412,16 @@ class HexTable extends JTable {
 	}
 
 
-	public Component prepareRenderer(TableCellRenderer renderer, int row,
-									int column) {
-		Object value = getValueAt(row, column);
-		boolean isSelected = isCellSelected(row, column);
-		boolean hasFocus = cellToOffset(row, column)==leadSelectionIndex;
-
-		return renderer.getTableCellRendererComponent(this, value,
-										isSelected, hasFocus, row, column);
+    @Override
+	public Component prepareRenderer(TableCellRenderer renderer, int row, int column) {
+		final Object value = getValueAt(row, column);
+		final boolean isSelected = isCellSelected(row, column);
+		final boolean hasFocus = cellToOffset(row, column)==leadSelectionIndex;
+		return renderer.getTableCellRendererComponent(this, value, isSelected, hasFocus, row, column);
 	}
 
 
+    @Override
 	protected void processKeyEvent (java.awt.event.KeyEvent e) {
 
 		// TODO: Convert into Actions and put into InputMap/ActionMap?
@@ -517,12 +514,12 @@ class HexTable extends JTable {
 		// TODO: Repaint only selected lines.
 		repaint();
 	}
-    
+
 
 	/**
 	 * Removes a listener who isn't any longer interested whether the text
 	 * selection from the hex editor becomes changed.
-	 * 
+	 *
 	 * @param l The concerning previous prospect.
 	 * @see #addSelectionChangedListener(SelectionChangedListener)
 	 */
@@ -545,12 +542,11 @@ class HexTable extends JTable {
 
 
 	public void setSelectedRows(int min, int max) {
-		if (min<0 || min>=getRowCount() ||
-				max<0 || max>=getRowCount()) {
+		if (min<0 || min>=getRowCount() || max<0 || max>=getRowCount())
 			throw new IllegalArgumentException();
-		}
-		int startOffs = min*16;
-		int endOffs = max*16+15;
+
+		final int startOffs = min*16;
+		final int endOffs = max*16+15;
 		// TODO: Have a single call to change selection by a range.
 		changeSelectionByOffset(startOffs, false);
 		changeSelectionByOffset(endOffs, true);
@@ -569,7 +565,7 @@ class HexTable extends JTable {
 
 		startOffs = Math.max(0, startOffs);
 		startOffs= Math.min(startOffs, model.getByteCount()-1);
-		
+
 		// Clear the old selection (may not be necessary).
 		repaintSelection();
 
@@ -615,31 +611,31 @@ class HexTable extends JTable {
 	 * @author Robert Futrell
 	 * @version 1.0
 	 */
-	private static class CellEditor extends DefaultCellEditor
-									implements FocusListener {
+	private static class CellEditor extends DefaultCellEditor implements FocusListener {
 
 		private static final long serialVersionUID = 1L;
 
 		public CellEditor() {
 			super(new JTextField());
-			AbstractDocument doc = (AbstractDocument)
-						((JTextComponent)editorComponent).getDocument();
+			final AbstractDocument doc = (AbstractDocument)((JTextComponent)editorComponent).getDocument();
 			doc.setDocumentFilter(new EditorDocumentFilter());
 			getComponent().addFocusListener(this);
 		}
 
+        @Override
 		public void focusGained(FocusEvent e) {
-			JTextField textField = (JTextField)getComponent();
-			textField.selectAll();
+			((JTextField)getComponent()).selectAll();
 		}
 
+        @Override
 		public void focusLost(FocusEvent e) {
 		}
 
+        @Override
 		public boolean stopCellEditing() {
 			// Prevent the user from entering empty string as a value.
-			String value = (String)getCellEditorValue();
-			if (value.length()==0) {
+			final String value = (String)getCellEditorValue();
+			if(value.isEmpty()) {
 				UIManager.getLookAndFeel().provideErrorFeedback(null);
 				return false;
 			}
@@ -664,56 +660,57 @@ class HexTable extends JTable {
 
 		private static final long serialVersionUID = 1L;
 
+        private final Color disabledBackground = UIManager.getColor("ComboBox.disabledBackground");
+        private final Color selectedBackground = UIManager.getColor("Table.selectionBackground");
 		private Point highlight;
 
 		public CellRenderer() {
 			highlight = new Point();
 		}
 
-		public Component getTableCellRendererComponent(JTable table,
-						Object value, boolean selected, boolean focus,
-						int row, int column) {
+        @Override
+		public Component getTableCellRendererComponent(JTable table, Object value, boolean selected, boolean focus,
+						 int row, int column) {
 
-			super.getTableCellRendererComponent(table, value, selected, focus,
-												row, column);
+			super.getTableCellRendererComponent(table, value, selected, focus, row, column);
 
 			highlight.setLocation(-1, -1);
-			if (column==table.getColumnCount()-1 && // "Ascii dump"
-					hexEditor.getHighlightSelectionInAsciiDump()) {
+			if(column==table.getColumnCount()-1 && hexEditor.getHighlightSelectionInAsciiDump()) {
 				int selStart = getSmallestSelectionIndex();
 				int selEnd = getLargestSelectionIndex();
 				int b1 = row*16;
 				int b2 = b1 + 15;
-				if (selStart<=b2 && selEnd>=b1) {
+				if(selStart<=b2 && selEnd>=b1) {
 					int start = Math.max(selStart, b1) - b1;
 					int end = Math.min(selEnd, b2) - b1;
 					highlight.setLocation(start, end);
 				}
 				boolean colorBG = hexEditor.getAlternateRowBG() && (row&1)>0;
-				setBackground(colorBG ? ANTERNATING_CELL_COLOR :
-								table.getBackground());
-			}
-			else {
-				if (!selected) {
-					if ((hexEditor.getAlternateRowBG() && (row&1)>0) ^
-							(hexEditor.getAlternateColumnBG() && (column&1)>0)){
+				setBackground(colorBG ? ANTERNATING_CELL_COLOR : table.getBackground());
+                if(!table.isEnabled())
+                        setBackground(disabledBackground);
+			} else {
+				if(!selected) {
+					if((hexEditor.getAlternateRowBG() && (row&1)>0)^(hexEditor.getAlternateColumnBG() && (column&1)>0)){
 						setBackground(ANTERNATING_CELL_COLOR);
-					}
-					else {
+					} else {
 						setBackground(table.getBackground());
 					}
-				}
+                    if(!table.isEnabled())
+                        setBackground(disabledBackground);
+				} else {
+                    setBackground(selectedBackground);
+                }
 			}
 
 			return this;
-
 		}
 
+        @Override
 		protected void paintComponent(Graphics g) {
-
 			g.setColor(getBackground());
 		    g.fillRect(0, 0, getWidth(),getHeight());
-		    
+
 		    if (highlight.x>-1) {
 		    	int w = getFontMetrics(HexTable.this.getFont()).charWidth('w');
 		    	g.setColor(hexEditor.getHighlightSelectionInAsciiDumpColor());
@@ -746,10 +743,10 @@ class HexTable extends JTable {
 
 		private boolean ensureByteRepresented(String str) {
 			try {
-				int i = Integer.parseInt(str, 16);
-				if (i<0 || i>0xff) {
+				final int i = Integer.parseInt(str, 16);
+				if (i<0 || i>0xff)
 					throw new NumberFormatException();
-				}
+
 			} catch (NumberFormatException nfe) {
 				UIManager.getLookAndFeel().provideErrorFeedback(null);
 				return false;
@@ -757,24 +754,22 @@ class HexTable extends JTable {
 			return true;
 		}
 
-		public void insertString(FilterBypass fb, int offs, String string,
-								AttributeSet attr) throws BadLocationException {
-			Document doc = fb.getDocument();
-			String temp = doc.getText(0, offs) + string +
-								doc.getText(offs, doc.getLength()-offs);
-			if (ensureByteRepresented(temp)) {
+        @Override
+		public void insertString(FilterBypass fb, int offs, String string, AttributeSet attr)
+                    throws BadLocationException {
+			final Document doc = fb.getDocument();
+			final String temp = doc.getText(0, offs) + string + doc.getText(offs, doc.getLength()-offs);
+			if(ensureByteRepresented(temp))
 				fb.insertString(offs, temp, attr);
-			}
 		}
 
-		public void replace(FilterBypass fb, int offs, int len, String text,
-							AttributeSet attrs) throws BadLocationException {
-			Document doc = fb.getDocument();
-			String temp = doc.getText(0, offs) + text +
-						doc.getText(offs+len, doc.getLength()-(offs+len));
-			if (ensureByteRepresented(temp)) {
+        @Override
+		public void replace(FilterBypass fb, int offs, int len, String text, AttributeSet attrs)
+                    throws BadLocationException {
+			final Document doc = fb.getDocument();
+			final String temp = doc.getText(0, offs) + text + doc.getText(offs+len, doc.getLength()-(offs+len));
+			if(ensureByteRepresented(temp))
 				fb.replace(offs, len, text, attrs);
-			}
 		}
 
 	}

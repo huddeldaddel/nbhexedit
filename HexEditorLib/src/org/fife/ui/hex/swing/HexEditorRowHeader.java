@@ -37,8 +37,7 @@ import javax.swing.event.TableModelListener;
 
 
 /**
- * Header of the hex table; displays address of the first byte on the
- * row.
+ * Header of the hex table; displays address of the first byte on the row.
  *
  * @author Robert Futrell
  * @version 1.0
@@ -50,8 +49,7 @@ class HexEditorRowHeader extends JList implements TableModelListener {
 	private HexTable table;
 	private RowHeaderListModel model;
 
-	private static final Border CELL_BORDER =
-							BorderFactory.createEmptyBorder(0,5,0,5);
+	private static final Border CELL_BORDER = BorderFactory.createEmptyBorder(0,5,0,5);
 
 
 	/**
@@ -74,6 +72,7 @@ class HexEditorRowHeader extends JList implements TableModelListener {
 	}
 
 
+    @Override
 	public void addSelectionInterval(int anchor, int lead) {
 		super.addSelectionInterval(anchor, lead);
 		int min = Math.min(anchor, lead);
@@ -82,6 +81,7 @@ class HexEditorRowHeader extends JList implements TableModelListener {
 	}
 
 
+    @Override
 	public void removeSelectionInterval(int index0, int index1) {
 		super.removeSelectionInterval(index0, index1);
 		int anchor = getAnchorSelectionIndex();
@@ -90,6 +90,7 @@ class HexEditorRowHeader extends JList implements TableModelListener {
 	}
 
 
+    @Override
 	public void setSelectionInterval(int anchor, int lead) {
 		super.setSelectionInterval(anchor, lead);
 		int min = Math.min(anchor, lead);
@@ -109,6 +110,7 @@ class HexEditorRowHeader extends JList implements TableModelListener {
 	}
 
 
+    @Override
 	public void tableChanged(TableModelEvent e) {
 		syncRowCount();
 	}
@@ -128,13 +130,11 @@ class HexEditorRowHeader extends JList implements TableModelListener {
 			setHorizontalAlignment(JLabel.RIGHT);
 		}
 
-		public Component getListCellRendererComponent(JList list, Object value,
-							int index, boolean selected, boolean hasFocus) {
-			// Never paint cells as "selected."
-			super.getListCellRendererComponent(list, value, index,
-												false, hasFocus);
+        @Override
+		public Component getListCellRendererComponent(JList list, Object value, int index, boolean selected,
+                         boolean hasFocus) {
+			super.getListCellRendererComponent(list, value, index, false, hasFocus);
 			setBorder(CELL_BORDER);
-//			setBackground(table.getBackground());
 			return this;
 		}
 
@@ -153,10 +153,12 @@ class HexEditorRowHeader extends JList implements TableModelListener {
 
 		private int size;
 
+        @Override
 		public Object getElementAt(int index) {
 			return "0x" + Integer.toHexString(index*16);
 		}
 
+        @Override
 		public int getSize() {
 			return size;
 		}
@@ -167,8 +169,7 @@ class HexEditorRowHeader extends JList implements TableModelListener {
 			int diff = size - old;
 			if (diff>0) {
 				fireIntervalAdded(this, old, size-1);
-			}
-			else if (diff<0) {
+			} else if (diff<0) {
 				fireIntervalRemoved(this, size+1, old-1);
 			}
 		}
@@ -177,9 +178,8 @@ class HexEditorRowHeader extends JList implements TableModelListener {
 
 
 	/**
-	 * Border for the entire row header.  This draws a line to separate the
-	 * header from the table contents, and gives a small amount of whitespace
-	 * to separate the two.
+	 * Border for the entire row header.  This draws a line to separate the header from the table contents, and gives a
+     * small amount of whitespace to separate the two.
 	 *
 	 * @author Robert Futrell
 	 * @version 1.0
@@ -192,11 +192,9 @@ class HexEditorRowHeader extends JList implements TableModelListener {
 			super(0,0,0,2);
 		}
 
-	    public void paintBorder(Component c, Graphics g, int x, int y,
-	    						int width, int height) {
-	    	x = x + width - this.right;
-//	    	g.setColor(table.getBackground());
-//	    	g.fillRect(x,y, width,height);
+        @Override
+	    public void paintBorder(Component c, Graphics g, int x, int y, int width, int height) {
+	    	x = x +width -this.right;
 	    	g.setColor(table.getGridColor());
 	    	g.drawLine(x,y, x,y+height);
 	    }
