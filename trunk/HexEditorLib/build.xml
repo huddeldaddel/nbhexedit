@@ -24,7 +24,7 @@
 	<property name="app-dir"          location="dist"/>
 	<property name="debug"            value="true"/>
 	<property name="debuglevel"       value="lines,var,source"/>
-	<property name="java-level"       value="1.4"/>
+	<property name="java-level"       value="1.6"/>
 
 
 	<!-- Compiles all classes.  -->

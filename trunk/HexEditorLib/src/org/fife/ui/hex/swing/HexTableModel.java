@@ -37,7 +37,6 @@ import javax.swing.undo.*;
 
 import org.fife.ui.hex.ByteBuffer;
 
-
 /**
  * The table model used by the <code>JTable</code> in the hex editor.
  *
@@ -48,26 +47,25 @@ public class HexTableModel extends AbstractTableModel {
 
 	private static final long serialVersionUID = 1L;
 
-	private HexEditor editor;
-	private ByteBuffer doc;
-	private int bytesPerRow;
-	private UndoManager undoManager;
-	private String[] columnNames;
-	private byte[] bitBuf = new byte[16];
-	private char[] dumpColBuf;
+	private final HexEditor editor;
+	private final int bytesPerRow;
+	private final UndoManager undoManager;
+	private final String[] columnNames;
+	private final byte[] bitBuf = new byte[16];
+	private final char[] dumpColBuf;
+
+    private ByteBuffer doc;
 
 	/**
 	 * Cache of string values of "<code>0</code>"-"<code>ff</code>" for fast
 	 * rendering.
 	 */
 	private String[] paddedLowerByteStrVals;
-
 	/**
 	 * Cache of "padded" string values of "<code>00</code>"-"<code>0f</code>"
 	 * for fast rendering.
 	 */
 	private String[] byteStrVals;
-
 
 	/**
 	 * Creates the model.
@@ -76,7 +74,6 @@ public class HexTableModel extends AbstractTableModel {
 	 * @param msg The resource bundle for localizations.
 	 */
 	public HexTableModel(HexEditor editor, ResourceBundle msg) {
-
 		this.editor = editor;
 		doc = new ByteBuffer(16);
 		bytesPerRow = 16;
@@ -84,26 +81,21 @@ public class HexTableModel extends AbstractTableModel {
 		undoManager = new UndoManager();
 
 		columnNames = new String[17];
-		for (int i=0; i<16; i++) {
+		for(int i=0; i<16; i++)
 			columnNames[i] = "+" + Integer.toHexString(i).toUpperCase();
-		}
 		columnNames[16] = msg.getString("AsciiDump");
 
 		dumpColBuf = new char[16];
 		Arrays.fill(dumpColBuf, ' ');
 
 		byteStrVals = new String[256];
-		for (int i=0; i<byteStrVals.length; i++) {
+		for(int i=0; i<byteStrVals.length; i++)
 			byteStrVals[i] = Integer.toHexString(i);
-		}
 
 		paddedLowerByteStrVals = new String[16];
-		for (int i=0; i<paddedLowerByteStrVals.length; i++) {
+		for(int i=0; i<paddedLowerByteStrVals.length; i++)
 			paddedLowerByteStrVals[i] = "0" + Integer.toHexString(i);
-		}
-
 	}
-
 
 	/**
 	 * Gets the byte at the specified offset in the document.
@@ -115,7 +107,6 @@ public class HexTableModel extends AbstractTableModel {
 		return doc.getByte(offset);
 	}
 
-
 	/**
 	 * Returns the number of bytes in the document.
 	 *
@@ -124,7 +115,6 @@ public class HexTableModel extends AbstractTableModel {
 	public int getByteCount() {
 		return doc.getSize();
 	}
-
 
 	/**
 	 * Returns the number of bytes to display in a row.
@@ -135,44 +125,41 @@ public class HexTableModel extends AbstractTableModel {
 		return bytesPerRow;
 	}
 
-
 	/**
 	 * Returns the number of columns to display in the hex editor.
 	 *
 	 * @return The number of columns to display.
 	 */
+    @Override
 	public int getColumnCount() {
 		return getBytesPerRow() + 1;
 	}
 
-
+    @Override
 	public String getColumnName(int col) {
 		return columnNames[col];
 	}
-
 
 	/**
 	 * Gets the number of rows to display in the hex editor.
 	 *
 	 * @return The number of rows to display.
 	 */
+    @Override
 	public int getRowCount() {
-		return doc.getSize()/bytesPerRow +
-				(doc.getSize()%bytesPerRow>0 ? 1 : 0);
+		return doc.getSize()/bytesPerRow +(doc.getSize()%bytesPerRow>0 ? 1 : 0);
 	}
 
-
 	/**
-	 * Returns the value to display at the specified cell in the table, as
-	 * a <code>String</code>.
+	 * Returns the value to display at the specified cell in the table, as a <code>String</code>.
 	 *
 	 * @param row The row of the cell.
 	 * @param col The column of the cell.
 	 * @return The value to display.
 	 */
+    @Override
 	public Object getValueAt(int row, int col) {
-
-		if (col==bytesPerRow) {
+		if(col==bytesPerRow) {
 			// Get ascii dump of entire row
 			int pos = editor.cellToOffset(row, 0);
 			if (pos==-1) { // A cleared row (from deletions)
@@ -195,11 +182,8 @@ public class HexTableModel extends AbstractTableModel {
 		}
 		// & with 0xff to convert to unsigned
 		int b = doc.getByte(pos)&0xff;
-		return (b<0x10 && editor.getPadLowBytes()) ?
-							paddedLowerByteStrVals[b] : byteStrVals[b];
-
+		return (b<0x10 && editor.getPadLowBytes()) ? paddedLowerByteStrVals[b] : byteStrVals[b];
 	}
-
 
 	/**
 	 * Redoes the last undoable edit undone.
@@ -213,13 +197,11 @@ public class HexTableModel extends AbstractTableModel {
 		if (canRedo) {
 			undoManager.redo();
 			canRedo = undoManager.canRedo();
-		}
-		else {
+		} else {
 			UIManager.getLookAndFeel().provideErrorFeedback(editor);
 		}
 		return canRedo;
 	}
-
 
 	/**
 	 * Removes bytes from the document.
@@ -233,19 +215,16 @@ public class HexTableModel extends AbstractTableModel {
 		replaceBytes(offset, len, null);
 	}
 
-
 	/**
 	 * Replaces bytes in the document.
 	 *
 	 * @param offset The offset of the range of bytes to replace.
 	 * @param len The number of bytes to replace.
-	 * @param bytes The bytes to replace with.  If this is <code>null</code>
-	 *        or an empty array, then this method call will be equivalent to
-	 *        <code>removeBytes(offset, len)</code>.
+	 * @param bytes The bytes to replace with.  If this is <code>null</code> or an empty array, then this method call
+     *              will be equivalent to <code>removeBytes(offset, len)</code>.
 	 * @see #removeBytes(int, int)
 	 */
 	public void replaceBytes(int offset, int len, byte[] bytes) {
-
 		byte[] removed = null;
 		if (len>0) {
 			removed = new byte[len];
@@ -255,20 +234,17 @@ public class HexTableModel extends AbstractTableModel {
 		byte[] added = null;
 		if (bytes!=null && bytes.length>0) {
 			doc.insertBytes(offset, bytes);
-			added = (byte[])bytes.clone();
+			added = bytes.clone();
 		}
 
 		if (removed!=null || added!=null) {
-			undoManager.addEdit(
-					new BytesReplacedUndoableEdit(offset, removed, added));
+			undoManager.addEdit(new BytesReplacedUndoableEdit(offset, removed, added));
 			fireTableDataChanged();
 			int addCount = added==null ? 0 : added.length;
 			int remCount = removed==null ? 0 : removed.length;
 			editor.fireHexEditorEvent(offset, addCount, remCount);
 		}
-
 	}
-
 
 	/**
 	 * Sets the bytes displayed to those in the given file.
@@ -284,7 +260,6 @@ public class HexTableModel extends AbstractTableModel {
 		editor.fireHexEditorEvent(0, doc.getSize(), 0);
 	}
 
-
 	/**
 	 * Sets the bytes displayed to those from an input stream.
 	 *
@@ -299,38 +274,49 @@ public class HexTableModel extends AbstractTableModel {
 		editor.fireHexEditorEvent(0, doc.getSize(), 0);
 	}
 
-
 	/**
 	 * Sets the value of a cell in the table.
 	 *
-	 * @param value The new value for the cell.  This should be a String
-	 *        representing an unsigned byte in hexadecimal, i.e.
-	 *        <code>"00"</code> to <code>"ff"</code>.
+	 * @param value The new value for the cell.  This should be a String representing an unsigned byte in hexadecimal,
+     *              i.e. <code>"00"</code> to <code>"ff"</code>.
 	 * @param row The row of the cell to change.
 	 * @param col The column of the cell to change.
 	 */
+    @Override
 	public void setValueAt(Object value, int row, int col) {
-		byte b = (byte)Integer.parseInt((String)value, 16);
 		int offset = editor.cellToOffset(row, col);
-		if (offset>-1) { // i.e., not col 17...
-			byte old = doc.getByte(offset);
-			if (old==b) {
+		if(offset >- 1) {
+            // A byte cell has been updated
+            final byte b = (byte)Integer.parseInt((String)value, 16);
+			final byte old = doc.getByte(offset);
+			if(old==b)
 				return;
-			}
+
 			doc.setByte(offset, b);
 			undoManager.addEdit(new ByteChangedUndoableEdit(offset, old, b));
 			fireTableCellUpdated(row, col);
 			fireTableCellUpdated(row, bytesPerRow); // "Ascii dump" column
 			editor.fireHexEditorEvent(offset, 1, 1);
+		} else if(col==bytesPerRow) {
+			// Get ascii dump of entire row
+			offset = editor.cellToOffset(row, 0);
+			if(offset != -1) {
+                final int oldLength = ((String)getValueAt(row, col)).length();
+                final byte[] buffer = ((String)value).getBytes();
+                replaceBytes(offset, oldLength, buffer);
+                if(((String)value).length() == oldLength) {
+                    fireTableCellUpdated(row, col);
+                    fireTableCellUpdated(row, bytesPerRow);
+                } else
+                    fireTableDataChanged();
+            }
 		}
 	}
-
 
 	/**
 	 * Undoes the previous undoable edit.
 	 *
-	 * @return Whether there is another operation that can be undone
-	 *         after this one.
+	 * @return Whether there is another operation that can be undone after this one.
 	 * @see #redo()
 	 */
 	public boolean undo() {
@@ -338,8 +324,7 @@ public class HexTableModel extends AbstractTableModel {
 		if (canUndo) {
 			undoManager.undo();
 			canUndo = undoManager.canUndo();
-		}
-		else {
+		} else {
 			UIManager.getLookAndFeel().provideErrorFeedback(editor);
 		}
 		return canUndo;
@@ -356,9 +341,9 @@ public class HexTableModel extends AbstractTableModel {
 
 		private static final long serialVersionUID = 1L;
 
-		private int offs;
-		private byte oldVal;
-		private byte newVal;
+		private final int offs;
+		private final byte oldVal;
+		private final byte newVal;
 
 		public ByteChangedUndoableEdit(int offs, byte oldVal, byte newVal) {
 			this.offs = offs;
@@ -366,6 +351,7 @@ public class HexTableModel extends AbstractTableModel {
 			this.newVal = newVal;
 		}
 
+        @Override
 		public void undo() {
 			super.undo();
 			if (getByteCount()<offs) {
@@ -374,6 +360,7 @@ public class HexTableModel extends AbstractTableModel {
 			setValueImpl(offs, oldVal);
 		}
 
+        @Override
 		public void redo() {
 			super.redo();
 			if (getByteCount()<offs) {
@@ -395,8 +382,7 @@ public class HexTableModel extends AbstractTableModel {
 
 
 	/**
-	 * An "undoable event" representing a range of bytes being replaced
-	 * (or just removed or inserted)
+	 * An "undoable event" representing a range of bytes being replaced (or just removed or inserted)
 	 *
 	 * @author Robert Futrell
 	 * @version 1.0
@@ -405,30 +391,31 @@ public class HexTableModel extends AbstractTableModel {
 
 		private static final long serialVersionUID = 1L;
 
-		private int offs;
-		private byte[] removed;
-		private byte[] added;
+		private final int offs;
+		private final byte[] removed;
+		private final byte[] added;
 
-		public BytesReplacedUndoableEdit(int offs, byte[] removed,
-										byte[] added) {
+		public BytesReplacedUndoableEdit(int offs, byte[] removed, byte[] added) {
 			this.offs = offs;
 			this.removed = removed;
 			this.added = added;
 		}
 
+        @Override
 		public void undo() {
 			super.undo();
-			if (getByteCount()<offs) {
+			if(getByteCount()<offs)
 				throw new CannotUndoException();
-			}
+
 			removeAndAdd(added, removed);
 		}
 
+        @Override
 		public void redo() {
 			super.redo();
-			if (getByteCount()<offs) {
+			if(getByteCount()<offs)
 				throw new CannotRedoException();
-			}
+
 			removeAndAdd(removed, added);
 		}
 
@@ -439,9 +426,9 @@ public class HexTableModel extends AbstractTableModel {
 			doc.insertBytes(offs, toAdd);
 			fireTableDataChanged();
 			int endOffs = offs;
-			if (toAdd!=null && toAdd.length>0) {
+			if(toAdd!=null && toAdd.length>0)
 				endOffs += toAdd.length - 1;
-			}
+
 			editor.setSelectedRange(offs, endOffs);
 			editor.fireHexEditorEvent(offs, addCount, remCount);
 		}
