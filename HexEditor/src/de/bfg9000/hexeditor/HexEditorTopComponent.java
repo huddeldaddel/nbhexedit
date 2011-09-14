@@ -21,6 +21,12 @@
 package de.bfg9000.hexeditor;
 
 import java.awt.BorderLayout;
+import java.awt.Toolkit;
+import java.awt.datatransfer.Clipboard;
+import java.awt.datatransfer.FlavorEvent;
+import java.awt.datatransfer.FlavorListener;
+import java.awt.event.ActionEvent;
+import javax.swing.AbstractAction;
 import org.fife.ui.hex.swing.HexEditor;
 import org.openide.util.NbBundle;
 import org.openide.windows.TopComponent;
@@ -53,6 +59,25 @@ public final class HexEditorTopComponent extends TopComponent {
 
         setName(NbBundle.getMessage(HexEditorTopComponent.class, "CTL_HexEditorTopComponent"));
         setToolTipText(NbBundle.getMessage(HexEditorTopComponent.class, "HINT_HexEditorTopComponent"));
+        
+        getActionMap().put("copy-to-clipboard", new AbstractAction() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                hexEditor.copy();
+            }
+        });
+        getActionMap().put("cut-to-clipboard", new AbstractAction() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                hexEditor.cut();
+            }
+        });
+        getActionMap().put("paste-from-clipboard", new AbstractAction() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                hexEditor.paste();
+            }
+        });   
     }
 
     public void openDataObject(DataObject dataObject) {
