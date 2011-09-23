@@ -34,7 +34,44 @@ import org.openide.windows.WindowManager;
 @ActionID(category = "File", id = "de.bfg9000.hexeditor.OpenAsHexAction")
 @ActionRegistration(displayName = "#CTL_OpenAsHexAction")
 @ActionReferences({
-    @ActionReference(path = "Loaders/content/unknown/Actions", position = 175)
+    @ActionReference(path = "Loaders/application/pdf/Actions", position = 175),
+    @ActionReference(path = "Loaders/application/x-class-file/Actions", position = 175),
+    @ActionReference(path = "Loaders/application/x-java-archive/Actions", position = 175),
+    @ActionReference(path = "Loaders/application/xml/Actions", position = 175),
+    @ActionReference(path = "Loaders/application/xslt+xml/Actions", position = 175),
+    @ActionReference(path = "Loaders/content/unknown/Actions", position = 175),
+    @ActionReference(path = "Loaders/image/png-gif-jpeg-bmp/Actions", position = 175),
+    @ActionReference(path = "Loaders/text/dtd-xml/Actions", position=175),
+    @ActionReference(path = "Loaders/text/html/Actions", position=175),
+    @ActionReference(path = "Loaders/text/javascript/Actions", position=175),
+    @ActionReference(path = "Loaders/text/url/Actions", position=175),
+    @ActionReference(path = "Loaders/text/x-ant+xml/Actions", position=175),
+    @ActionReference(path = "Loaders/text/x-css/Actions", position=175),
+    @ActionReference(path = "Loaders/text/x-dbschema+xml/Actions", position=175),
+    @ActionReference(path = "Loaders/text/x-diff/Actions", position=175),
+    @ActionReference(path = "Loaders/text/x-dtd/Actions", position=175),
+    @ActionReference(path = "Loaders/text/x-form/Actions", position=175),
+    @ActionReference(path = "Loaders/text/x-fx/Actions", position=175),
+    @ActionReference(path = "Loaders/text/x-hibernate-cfg+xml/Actions", position=175),
+    @ActionReference(path = "Loaders/text/x-hibernate-mapping+xml/Actions", position=175),
+    @ActionReference(path = "Loaders/text/x-hibernate-reveng+xml/Actions", position=175),
+    @ActionReference(path = "Loaders/text/x-java/Actions", position=175),
+    @ActionReference(path = "Loaders/text/x-jnlp+xml/Actions", position=175),
+    @ActionReference(path = "Loaders/text/x-json/Actions", position=175),
+    @ActionReference(path = "Loaders/text/x-jsp/Actions", position=175),
+    @ActionReference(path = "Loaders/text/x-manifest/Actions", position=175),
+    @ActionReference(path = "Loaders/text/x-maven-pom+xml/Actions", position=175),
+    @ActionReference(path = "Loaders/text/x-nbs/Actions", position=175),
+    @ActionReference(path = "Loaders/text/x-netbeans-layer+xml/Actions", position=175),
+    @ActionReference(path = "Loaders/text/x-palette-item/Actions", position=175),
+    @ActionReference(path = "Loaders/text/x-persistence1.0/Actions", position=175),
+    @ActionReference(path = "Loaders/text/x-properties/Actions", position=175),
+    @ActionReference(path = "Loaders/text/x-springconfig+xml/Actions", position=175),
+    @ActionReference(path = "Loaders/text/x-sql/Actions", position=175),
+    @ActionReference(path = "Loaders/text/x-yaml/Actions", position=175),
+    @ActionReference(path = "Loaders/text/xhtml/Actions", position=175),
+    @ActionReference(path = "Loaders/text/xml/Actions", position=175)
+        
 })
 @Messages("CTL_OpenAsHexAction=Open as Hex")
 public final class OpenAsHexAction implements ActionListener {

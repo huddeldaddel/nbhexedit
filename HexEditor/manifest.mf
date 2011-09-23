@@ -3,5 +3,5 @@ OpenIDE-Module: de.bfg9000.hexeditor
 OpenIDE-Module-Layer: de/bfg9000/hexeditor/layer.xml
 OpenIDE-Module-Localizing-Bundle: de/bfg9000/hexeditor/Bundle.properties
 OpenIDE-Module-Requires: org.openide.windows.WindowManager
-OpenIDE-Module-Specification-Version: 1.0.1
+OpenIDE-Module-Specification-Version: 1.0.2
 
