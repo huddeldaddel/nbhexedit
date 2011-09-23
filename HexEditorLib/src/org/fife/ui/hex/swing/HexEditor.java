@@ -34,11 +34,11 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
-import java.awt.event.MouseListener;
 import java.io.*;
 import java.util.ResourceBundle;
 import javax.swing.*;
 
+import javax.swing.undo.UndoManager;
 import org.fife.ui.hex.event.HexEditorEvent;
 import org.fife.ui.hex.event.HexEditorListener;
 import org.fife.ui.hex.event.SelectionChangedListener;
@@ -636,6 +636,19 @@ public class HexEditor extends JScrollPane {
 		return table.undo();
 	}
 
+    /**
+     * @return the undoManager
+     */
+    public UndoManager getUndoManager() {
+        return table.getUndoManager();
+    }
+    
+    /**
+     * Updates the undoManager
+     */
+    public void setUndoManager(UndoManager manager) {
+        table.setUndoManager(manager);
+    }
 
     private JPopupMenu createContextMenu() {
         final JPopupMenu result = new JPopupMenu();

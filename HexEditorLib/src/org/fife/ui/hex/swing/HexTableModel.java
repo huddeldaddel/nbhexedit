@@ -32,6 +32,7 @@ import java.io.IOException;
 import java.util.Arrays;
 import java.util.ResourceBundle;
 import javax.swing.UIManager;
+import javax.swing.event.UndoableEditEvent;
 import javax.swing.table.AbstractTableModel;
 import javax.swing.undo.*;
 
@@ -49,12 +50,12 @@ public class HexTableModel extends AbstractTableModel {
 
 	private final HexEditor editor;
 	private final int bytesPerRow;
-	private final UndoManager undoManager;
 	private final String[] columnNames;
 	private final byte[] bitBuf = new byte[16];
 	private final char[] dumpColBuf;
 
     private ByteBuffer doc;
+    private UndoManager undoManager;
 
 	/**
 	 * Cache of string values of "<code>0</code>"-"<code>ff</code>" for fast
@@ -238,7 +239,7 @@ public class HexTableModel extends AbstractTableModel {
 		}
 
 		if (removed!=null || added!=null) {
-			undoManager.addEdit(new BytesReplacedUndoableEdit(offset, removed, added));
+			undoManager.undoableEditHappened(new UndoableEditEvent(this, new BytesReplacedUndoableEdit(offset, removed, added)));
 			fireTableDataChanged();
 			int addCount = added==null ? 0 : added.length;
 			int remCount = removed==null ? 0 : removed.length;
@@ -293,7 +294,7 @@ public class HexTableModel extends AbstractTableModel {
 				return;
 
 			doc.setByte(offset, b);
-			undoManager.addEdit(new ByteChangedUndoableEdit(offset, old, b));
+			undoManager.undoableEditHappened(new UndoableEditEvent(this, new ByteChangedUndoableEdit(offset, old, b)));
 			fireTableCellUpdated(row, col);
 			fireTableCellUpdated(row, bytesPerRow); // "Ascii dump" column
 			editor.fireHexEditorEvent(offset, 1, 1);
@@ -329,8 +330,21 @@ public class HexTableModel extends AbstractTableModel {
 		}
 		return canUndo;
 	}
+    
+    /**
+     * @return the undoManager
+     */
+    public UndoManager getUndoManager() {
+        return undoManager;
+    }
 
-
+    /**
+     * @return the undoManager
+     */
+    public void setUndoManager(UndoManager manager) {
+        undoManager = manager;
+    }
+    
 	/**
 	 * An "undoable event" representing a single byte changing value.
 	 *

@@ -55,6 +55,7 @@ import javax.swing.text.Document;
 import javax.swing.text.DocumentFilter;
 import javax.swing.text.JTextComponent;
 
+import javax.swing.undo.UndoManager;
 import org.fife.ui.hex.event.SelectionChangedEvent;
 import org.fife.ui.hex.event.SelectionChangedListener;
 
@@ -603,7 +604,20 @@ class HexTable extends JTable {
 		return model.undo();
 	}
 
-
+    /**
+     * @return the undoManager
+     */
+    public UndoManager getUndoManager() {
+        return model.getUndoManager();
+    }
+    
+    /**
+     * Updates the undoManager
+     */
+    public void setUndoManager(UndoManager manager) {
+        model.setUndoManager(manager);
+    }
+    
 	/**
 	 * Table cell editor that restricts input to byte values
 	 * (<code>0 - 255</code>).
