@@ -21,26 +21,35 @@
 package de.bfg9000.hexeditor;
 
 import java.awt.BorderLayout;
+import java.awt.Component;
 import java.awt.event.ActionEvent;
-import java.util.LinkedList;
+import java.io.IOException;
+import java.nio.charset.Charset;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
+import java.util.SortedMap;
 import javax.swing.AbstractAction;
-import javax.swing.event.ChangeEvent;
-import javax.swing.event.ChangeListener;
-import javax.swing.event.UndoableEditEvent;
-import javax.swing.undo.UndoManager;
+import javax.swing.DefaultComboBoxModel;
+import javax.swing.JOptionPane;
 import org.fife.ui.hex.event.HexEditorEvent;
 import org.fife.ui.hex.event.HexEditorListener;
 import org.fife.ui.hex.swing.HexEditor;
-import org.openide.util.NbBundle;
-import org.openide.windows.TopComponent;
 import org.netbeans.api.settings.ConvertAsProperties;
 import org.openide.awt.UndoRedo;
 import org.openide.loaders.DataObject;
 import org.openide.nodes.Node;
+import org.openide.util.Exceptions;
+import org.openide.util.NbBundle;
+import org.openide.util.lookup.AbstractLookup;
+import org.openide.util.lookup.InstanceContent;
+import org.openide.windows.TopComponent;
+import org.openide.windows.WindowManager;
 
 /**
  * Top component which displays a file in a Hex Editor component.
+ * 
+ * @author Thomas Werner
  */
 @ConvertAsProperties(dtd = "-//de.bfg9000.hexeditor//HexEditor//EN", autostore = false)
 @TopComponent.Description(preferredID = "HexEditorTopComponent",
@@ -48,19 +57,28 @@ import org.openide.nodes.Node;
                           persistenceType = TopComponent.PERSISTENCE_NEVER)
 @TopComponent.Registration(mode = "editor", openAtStartup = false)
 @TopComponent.OpenActionRegistration(displayName = "#CTL_HexEditorAction", preferredID = "HexEditorTopComponent")
-public final class HexEditorTopComponent extends TopComponent implements UndoRedo.Provider {
+public final class HexEditorTopComponent extends TopComponent implements UndoRedo.Provider, HexEditorListener {
 
     private final HexEditorNode node;
     private final HexEditor hexEditor;
     private final UndoRedo.Manager undoRedo;
-
+    private final Savable savable;
+    private final InstanceContent content = new InstanceContent();
+    
+    private boolean opened = false;
+    protected String displayName;
+    
     public HexEditorTopComponent() {
         initComponents();
 
         hexEditor = new HexEditor();
+        hexEditor.addHexEditorListener(this);
         add(hexEditor, BorderLayout.CENTER);
 
         node = new HexEditorNode(hexEditor);
+        content.add(node);
+        savable = new Savable(this, hexEditor);
+        
         setActivatedNodes(new Node[]{node});
 
         undoRedo = new UndoRedo.Manager();
@@ -87,13 +105,59 @@ public final class HexEditorTopComponent extends TopComponent implements UndoRed
                 hexEditor.paste();
             }
         });   
+        
+        associateLookup(new AbstractLookup(content));
     }
-
+    
+    @Override
+    public boolean canClose() {
+        final Savable savable = getLookup().lookup(Savable.class);
+        if(null == savable)
+            return true;
+            
+        final Component parent = WindowManager.getDefault().getMainWindow();
+        final Object[] options = new Object[]{ "Save", "Discard", "Cancel" };
+        final String message = "File " +displayName +" is modified. Save?";
+        final int choice = JOptionPane.showOptionDialog(parent, message, "Question", JOptionPane.YES_NO_CANCEL_OPTION, 
+                           JOptionPane.QUESTION_MESSAGE, null, options, JOptionPane.YES_OPTION);
+        if(JOptionPane.CANCEL_OPTION == choice)
+            return false;
+        
+        if(JOptionPane.YES_OPTION == choice)
+            try {
+                savable.handleSave();
+            } catch (IOException ex) {
+                Exceptions.printStackTrace(ex);
+            }
+        
+        return true;
+    }
+    
+    @Override
+    public void hexBytesChanged(HexEditorEvent hee) {
+        setModified(true);
+    }
+    
+    void setModified(boolean modified) {
+        if(modified && opened) {
+            savable.activate();
+            content.add(savable);
+            setHtmlDisplayName("<html><b>" +displayName +"</b></html>");
+        } else {
+            savable.deactivate();
+            content.remove(savable);
+            setHtmlDisplayName(displayName);
+        }
+    }
+    
     public void openDataObject(DataObject dataObject) {
-        setDisplayName(dataObject.getPrimaryFile().getNameExt());
-        node.setDataObject(dataObject);
+        displayName = dataObject.getPrimaryFile().getNameExt();
+        setHtmlDisplayName(displayName);
+        node.openFile(dataObject);
+        savable.setDataObject(dataObject);
+        opened = true;
     }
-
+    
     @Override
     public UndoRedo getUndoRedo() {
         return undoRedo;
@@ -106,13 +170,28 @@ public final class HexEditorTopComponent extends TopComponent implements UndoRed
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
 
+        jPanel1 = new javax.swing.JPanel();
+        cmbEncoding = new javax.swing.JComboBox();
+
         setLayout(new java.awt.BorderLayout());
+
+        jPanel1.setLayout(new java.awt.FlowLayout(java.awt.FlowLayout.LEFT));
+
+        cmbEncoding.setPreferredSize(new java.awt.Dimension(200, 20));
+        jPanel1.add(cmbEncoding);
+
+        add(jPanel1, java.awt.BorderLayout.CENTER);
     }// </editor-fold>//GEN-END:initComponents
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
+    private javax.swing.JComboBox cmbEncoding;
+    private javax.swing.JPanel jPanel1;
     // End of variables declaration//GEN-END:variables
+    
     @Override
-    public void componentOpened() { }
+    public void componentOpened() { 
+        cmbEncoding.setModel(new DefaultComboBoxModel(getSupportedEncodings()));
+    }
 
     @Override
     public void componentClosed() { }
@@ -125,6 +204,13 @@ public final class HexEditorTopComponent extends TopComponent implements UndoRed
 
     void readProperties(java.util.Properties p) {
         String version = p.getProperty("version");
+    }
+ 
+    private Object[] getSupportedEncodings() {
+        final SortedMap<String, Charset> availableCharsets = Charset.availableCharsets();
+        final List<String> encodings = new ArrayList<String>(availableCharsets.keySet());
+        Collections.sort(encodings);
+        return encodings.toArray();
     }
     
 }

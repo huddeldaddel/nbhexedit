@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011, Thomas Werner
+ * Copyright (c) 2012, Thomas Werner
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without modification, are permitted provided that the
@@ -21,92 +21,30 @@
 package de.bfg9000.hexeditor;
 
 import java.io.BufferedInputStream;
-import java.io.BufferedOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.OutputStream;
-import org.fife.ui.hex.event.HexEditorEvent;
-import org.fife.ui.hex.event.HexEditorListener;
 import org.fife.ui.hex.swing.HexEditor;
-import org.openide.cookies.SaveCookie;
 import org.openide.loaders.DataObject;
 import org.openide.nodes.AbstractNode;
 import org.openide.nodes.Children;
 
-/**
- *
- * @author devx
- */
-class HexEditorNode extends AbstractNode implements HexEditorListener {
+class HexEditorNode extends AbstractNode {
 
-    private final SaveCookie saveCookie;
     private final HexEditor hexEditor;
-
-    private boolean opened = false;
-    private DataObject dataObject;
-
+    
     public HexEditorNode(HexEditor hexEditor) {
         super(Children.LEAF);
-        saveCookie = new SaveCookie() {
-            @Override
-            public void save() throws IOException {
-                saveChanges();
-                setModified(false);
-            }
-        };
 
-        this.hexEditor = hexEditor;
-        this.hexEditor.addHexEditorListener(this);
+        this.hexEditor = hexEditor;        
     }
 
-    public void setDataObject(DataObject dataObject) {
-        this.dataObject = dataObject;
-        openFile(dataObject);
-    }
-
-    public void setModified(boolean modified) {
-        if(modified)
-            getCookieSet().assign(SaveCookie.class, saveCookie);
-        else
-            getCookieSet().assign(SaveCookie.class);
-    }
-
-    @Override
-    public void hexBytesChanged(HexEditorEvent hee) {
-        if(opened)
-            setModified(true);
-    }
-
-    private void saveChanges() {
-        if(null == dataObject)
-            return;
-
-        OutputStream out = null;
-		try {
-            out = new BufferedOutputStream(dataObject.getPrimaryFile().getOutputStream());
-			if(out != null) {
-                final int count = hexEditor.getByteCount();
-				for(int i=0; i<count; i++)
-                    out.write(hexEditor.getByte(i));
-                out.flush();
-            }
-		} catch (IOException ioe) {
-		} finally {
-            if(null != out)
-                try {
-                   out.close();
-                } catch (IOException ex) { }
-        }
-    }
-
-    private void openFile(DataObject dataObject) {
+    public void openFile(DataObject dataObject) {
         InputStream in = null;
 		try {
             in = dataObject.getPrimaryFile().getInputStream();
 			if(in != null) {
 				hexEditor.open(new BufferedInputStream(in));
                 hexEditor.setEnabled(dataObject.getPrimaryFile().canWrite());
-                opened = true;
             }
 		} catch (IOException ioe) {
 		} finally {
