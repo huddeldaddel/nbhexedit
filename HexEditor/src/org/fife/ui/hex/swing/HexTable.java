@@ -3,27 +3,22 @@
  * Copyright (c) 2012 Thomas Werner
  * All rights reserved.
  *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions are met:
- *     * Redistributions of source code must retain the above copyright
- *       notice, this list of conditions and the following disclaimer.
- *     * Redistributions in binary form must reproduce the above copyright
- *       notice, this list of conditions and the following disclaimer in the
- *       documentation and/or other materials provided with the distribution.
- *     * Neither the name "HexEditor" nor the names of its contributors may
- *       be used to endorse or promote products derived from this software
- *       without specific prior written permission.
+ * Redistribution and use in source and binary forms, with or without modification, are permitted provided that the 
+ * following conditions are met:
+ *     * Redistributions of source code must retain the above copyright notice, this list of conditions and the 
+ *       following disclaimer.
+ *     * Redistributions in binary form must reproduce the above copyright notice, this list of conditions and the 
+ *       following disclaimer in the documentation and/or other materials provided with the distribution.
+ *     * Neither the name "HexEditor" nor the names of its contributors may be used to endorse or promote products 
+ *       derived from this software without specific prior written permission.
  *
- * THIS SOFTWARE IS PROVIDED BY ''AS IS'' AND ANY EXPRESS OR IMPLIED
- * WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
- * MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO
- * EVENT SHALL THE CONTRIBUTORS TO THIS SOFTWARE BE LIABLE FOR ANY DIRECT,
- * INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
- * (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
- * LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
- * ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
- * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
- * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ * THIS SOFTWARE IS PROVIDED BY ''AS IS'' AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE 
+ * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE 
+ * CONTRIBUTORS TO THIS SOFTWARE BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL 
+ * DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; 
+ * OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR 
+ * TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE 
+ * POSSIBILITY OF SUCH DAMAGE.
  */
 package org.fife.ui.hex.swing;
 
@@ -46,7 +41,6 @@ import org.fife.ui.hex.event.SelectionChangedListener;
 /**
  * The table displaying the hex content of a file. This is the meat of the hex viewer.
  *
- * @author Robert Futrell
  * @version 1.0
  */
 class HexTable extends JTable {
@@ -54,7 +48,12 @@ class HexTable extends JTable {
 	private static final long serialVersionUID = 1L;
 
 	private final HexEditor hexEditor;
-	private HexTableModel model;
+    private final DumpCellEditor dumpCellEditor;
+    private final DumpCellRenderer dumpCellRenderer;
+    
+	private HexTableModel model;    
+    private EncoderDecoder encoder;    
+    
 	int leadSelectionIndex;
 	int anchorSelectionIndex;
 
@@ -71,6 +70,11 @@ class HexTable extends JTable {
 		super(model);
 		this.hexEditor = hexEditor;
 		this.model = model;
+        
+        encoder = new EncoderDecoder();
+        dumpCellEditor = new DumpCellEditor(encoder);
+        dumpCellRenderer = new DumpCellRenderer(encoder);
+        
 		enableEvents(AWTEvent.KEY_EVENT_MASK);
 		setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
 		setFont(new Font("Monospaced", Font.PLAIN, 14));
@@ -92,7 +96,8 @@ class HexTable extends JTable {
 				column.setPreferredWidth(w);
 			} else {
 				column.setPreferredWidth(HexEditor.DUMP_COLUMN_WIDTH);
-                column.setCellEditor(new DumpCellEditor());
+                column.setCellEditor(dumpCellEditor);
+                column.setCellRenderer(dumpCellRenderer);
 			}
 		}
 
@@ -434,8 +439,7 @@ class HexTable extends JTable {
 				case KeyEvent.VK_PAGE_DOWN:
 					extend = e.isShiftDown();
 					int visibleRowCount = getVisibleRect().height/getRowHeight();
-					offs = Math.min(leadSelectionIndex+visibleRowCount*16,
-									model.getByteCount()-1);
+					offs = Math.min(leadSelectionIndex+visibleRowCount*16, model.getByteCount()-1);
 					changeSelectionByOffset(offs, extend);
 					e.consume();
 					break;
@@ -595,6 +599,13 @@ class HexTable extends JTable {
      */
     public void setUndoManager(UndoManager manager) {
         model.setUndoManager(manager);
+    }
+
+    void setEncoding(String encoding) {
+        encoder = new EncoderDecoder(encoding);
+        dumpCellEditor.setEncoder(encoder);
+        dumpCellRenderer.setEncoder(encoder);
+        model.fireTableDataChanged();
     }
     
 	/**
