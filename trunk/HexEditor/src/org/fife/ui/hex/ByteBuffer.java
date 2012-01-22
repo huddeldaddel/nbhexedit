@@ -125,10 +125,10 @@ public class ByteBuffer {
 
 
 	public int read(int offset, byte[] buf) {
-		if (buf==null) {
+		if(buf==null) 
 			return -1;
-		}
-		int count = Math.min(buf.length, getSize()-offset);
+		
+		final int count = Math.min(buf.length, getSize()-offset);
 		System.arraycopy(buffer,offset, buf,0, count);
 		return count;
 	}

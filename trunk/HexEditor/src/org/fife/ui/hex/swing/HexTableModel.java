@@ -1,28 +1,24 @@
 /*
  * Copyright (c) 2008 Robert Futrell
+ * Copyright (c) 2012 Thomas Werner
  * All rights reserved.
  *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions are met:
- *     * Redistributions of source code must retain the above copyright
- *       notice, this list of conditions and the following disclaimer.
- *     * Redistributions in binary form must reproduce the above copyright
- *       notice, this list of conditions and the following disclaimer in the
- *       documentation and/or other materials provided with the distribution.
- *     * Neither the name "HexEditor" nor the names of its contributors may
- *       be used to endorse or promote products derived from this software
- *       without specific prior written permission.
+ * Redistribution and use in source and binary forms, with or without modification, are permitted provided that the 
+ * following conditions are met:
+ *     * Redistributions of source code must retain the above copyright notice, this list of conditions and the 
+ *       following disclaimer.
+ *     * Redistributions in binary form must reproduce the above copyright notice, this list of conditions and the 
+ *       following disclaimer in the documentation and/or other materials provided with the distribution.
+ *     * Neither the name "HexEditor" nor the names of its contributors may be used to endorse or promote products 
+ *       derived from this software without specific prior written permission.
  *
- * THIS SOFTWARE IS PROVIDED BY ''AS IS'' AND ANY EXPRESS OR IMPLIED
- * WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
- * MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO
- * EVENT SHALL THE CONTRIBUTORS TO THIS SOFTWARE BE LIABLE FOR ANY DIRECT,
- * INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
- * (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
- * LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
- * ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
- * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
- * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ * THIS SOFTWARE IS PROVIDED BY ''AS IS'' AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE 
+ * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE 
+ * CONTRIBUTORS TO THIS SOFTWARE BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL 
+ * DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; 
+ * OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR 
+ * TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE 
+ * POSSIBILITY OF SUCH DAMAGE.
  */
 package org.fife.ui.hex.swing;
 
@@ -52,8 +48,7 @@ class HexTableModel extends AbstractTableModel {
 
 	private final HexEditor editor;
 	private final int bytesPerRow;
-	private final String[] columnNames;
-	private final byte[] bitBuf = new byte[16];
+	private final String[] columnNames;	
 	private final char[] dumpColBuf;
 
     private ByteBuffer doc;
@@ -162,21 +157,17 @@ class HexTableModel extends AbstractTableModel {
 	 */
     @Override
 	public Object getValueAt(int row, int col) {
-		if(col==bytesPerRow) {
-			// Get ascii dump of entire row
+		if(col==bytesPerRow) {  // this is the dump row
 			int pos = editor.cellToOffset(row, 0);
-			if (pos==-1) { // A cleared row (from deletions)
-				return "";
-			}
-			int count = doc.read(pos, bitBuf);
-			for (int i=0; i<count; i++) {
-				char ch = (char)bitBuf[i];
-				if (ch<0x20 || ch>0x7e) {
-					ch = '.';
-				}
-				dumpColBuf[i] = ch;
-			}
-			return new String(dumpColBuf, 0,count);
+			if(pos == -1) // A cleared row (from deletions)
+				return new byte[0];
+            
+            final byte[] bitBuf = new byte[16];
+			final int count = doc.read(pos, bitBuf);
+			
+			final byte[] result = new byte[count];
+            System.arraycopy(bitBuf, 0, result, 0, count);
+            return result;
 		}
 
 		int pos = editor.cellToOffset(row, col);
@@ -345,7 +336,7 @@ class HexTableModel extends AbstractTableModel {
      */
     public void setUndoManager(UndoManager manager) {
         undoManager = manager;
-    }
+    }    
     
 	/**
 	 * An "undoable event" representing a single byte changing value.

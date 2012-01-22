@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011, Thomas Werner
+ * Copyright (c) 2012, Thomas Werner
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without modification, are permitted provided that the
@@ -35,6 +35,7 @@ import javax.swing.JOptionPane;
 import org.fife.ui.hex.event.HexEditorEvent;
 import org.fife.ui.hex.event.HexEditorListener;
 import org.fife.ui.hex.swing.HexEditor;
+import org.netbeans.api.queries.FileEncodingQuery;
 import org.netbeans.api.settings.ConvertAsProperties;
 import org.openide.awt.UndoRedo;
 import org.openide.loaders.DataObject;
@@ -86,6 +87,8 @@ public final class HexEditorTopComponent extends TopComponent implements UndoRed
         
         setName(NbBundle.getMessage(HexEditorTopComponent.class, "CTL_HexEditorTopComponent"));
         setToolTipText(NbBundle.getMessage(HexEditorTopComponent.class, "HINT_HexEditorTopComponent"));
+        
+        cmbEncoding.setModel(new DefaultComboBoxModel(getSupportedEncodings()));
         
         getActionMap().put("copy-to-clipboard", new AbstractAction() {
             @Override
@@ -156,6 +159,10 @@ public final class HexEditorTopComponent extends TopComponent implements UndoRed
         node.openFile(dataObject);
         savable.setDataObject(dataObject);
         opened = true;
+        
+        final Charset encoding = FileEncodingQuery.getEncoding(dataObject.getPrimaryFile()); 
+        cmbEncoding.setSelectedItem(encoding.name());        
+        hexEditor.setEncoding(encoding.name());
     }
     
     @Override
@@ -170,28 +177,40 @@ public final class HexEditorTopComponent extends TopComponent implements UndoRed
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
 
-        jPanel1 = new javax.swing.JPanel();
+        pnlToolbar = new javax.swing.JPanel();
+        lblEncoding = new javax.swing.JLabel();
         cmbEncoding = new javax.swing.JComboBox();
 
         setLayout(new java.awt.BorderLayout());
 
-        jPanel1.setLayout(new java.awt.FlowLayout(java.awt.FlowLayout.LEFT));
+        pnlToolbar.setLayout(new java.awt.FlowLayout(java.awt.FlowLayout.LEFT));
+
+        org.openide.awt.Mnemonics.setLocalizedText(lblEncoding, org.openide.util.NbBundle.getMessage(HexEditorTopComponent.class, "HexEditorTopComponent.lblEncoding.text")); // NOI18N
+        pnlToolbar.add(lblEncoding);
 
         cmbEncoding.setPreferredSize(new java.awt.Dimension(200, 20));
-        jPanel1.add(cmbEncoding);
+        cmbEncoding.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                cmbEncodingActionPerformed(evt);
+            }
+        });
+        pnlToolbar.add(cmbEncoding);
 
-        add(jPanel1, java.awt.BorderLayout.CENTER);
+        add(pnlToolbar, java.awt.BorderLayout.NORTH);
     }// </editor-fold>//GEN-END:initComponents
+
+    private void cmbEncodingActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cmbEncodingActionPerformed
+        hexEditor.setEncoding(cmbEncoding.getSelectedItem().toString());
+    }//GEN-LAST:event_cmbEncodingActionPerformed
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JComboBox cmbEncoding;
-    private javax.swing.JPanel jPanel1;
+    private javax.swing.JLabel lblEncoding;
+    private javax.swing.JPanel pnlToolbar;
     // End of variables declaration//GEN-END:variables
     
     @Override
-    public void componentOpened() { 
-        cmbEncoding.setModel(new DefaultComboBoxModel(getSupportedEncodings()));
-    }
+    public void componentOpened() {  }
 
     @Override
     public void componentClosed() { }

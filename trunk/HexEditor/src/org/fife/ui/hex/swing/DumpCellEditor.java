@@ -28,11 +28,18 @@ import javax.swing.text.PlainDocument;
 
 class DumpCellEditor extends DefaultCellEditor {
     
-    public DumpCellEditor() {
+    private EncoderDecoder encoder;
+    
+    public DumpCellEditor(EncoderDecoder encoder) {
         super(new EditorField());
         delegate = new ByteConverterDelegate();
+        this.encoder = encoder;
     }
-
+    
+    public void setEncoder(EncoderDecoder encoder) {
+        this.encoder = encoder;
+    }
+    
     @Override
     public Object getCellEditorValue() {
         return null;
@@ -75,13 +82,13 @@ class DumpCellEditor extends DefaultCellEditor {
         
         @Override
         public void setValue(Object value) {
-            ((EditorField)editorComponent).setText((value != null) ? value.toString() : "");
+            ((EditorField)editorComponent).setText(encoder.encode(value));
         }
 
         @Override
         public Object getCellEditorValue() {
             return ((EditorField)editorComponent).getText();
-        }
+        }        
     
     }
     
