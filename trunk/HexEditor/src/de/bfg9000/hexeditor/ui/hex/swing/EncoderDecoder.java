@@ -18,42 +18,54 @@
  * WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.fife.ui.hex.swing;
+package de.bfg9000.hexeditor.ui.hex.swing;
 
-import javax.swing.DefaultCellEditor;
-import javax.swing.JTextField;
-import javax.swing.text.AttributeSet;
-import javax.swing.text.BadLocationException;
-import javax.swing.text.PlainDocument;
+import java.io.BufferedReader;
+import java.io.ByteArrayInputStream;
+import java.io.InputStreamReader;
+import java.nio.charset.Charset;
 
-class ByteCellEditor extends DefaultCellEditor {
+/**
+ * Encodes an Array of bytes using a named Charset.
+ * 
+ * @author Thomas Werner
+ */
+class EncoderDecoder {
     
-    public ByteCellEditor() {
-        super(new EditorField());
+    private String encoding;
+    
+    public EncoderDecoder() {
+        this(Charset.defaultCharset().name());
     }
     
-    private static final class EditorField extends JTextField {
-        
-        public EditorField() {
-            setDocument(new EditorDocument());
-        }
-        
+    public EncoderDecoder(String encoding) {
+        this.encoding = encoding;
     }
     
-    private static final class EditorDocument extends PlainDocument {
-        
-        private static final String RegEx = "[0-9a-fA-F]";
-        
-        @Override
-        public void insertString(int offset, String str, AttributeSet attr)
-                    throws BadLocationException {
-            if(str == null)
-                return;
+    public String encode(Object bytes) {
+        if(!(bytes instanceof byte[]))
+            return "";
 
-            if(((getLength() +str.length()) < 3) && str.matches(RegEx))
-                super.insertString(offset, str, attr);
+        final StringBuilder result = new StringBuilder();
+        BufferedReader br = null;
+        try {
+            final ByteArrayInputStream bais = new ByteArrayInputStream((byte[]) bytes);
+            final InputStreamReader isr = new InputStreamReader(bais, encoding);
+            br = new BufferedReader(isr);
+            while(true) {
+                String line = br.readLine();
+                if(null == line)
+                    break;
+                result.append(line);
+            }
+        } catch(Exception ex) {
+        } finally {
+            if(null != br)
+                try {
+                    br.close();
+                } catch(Exception ex) { }
         }
-        
+        return result.toString();
     }
     
 }

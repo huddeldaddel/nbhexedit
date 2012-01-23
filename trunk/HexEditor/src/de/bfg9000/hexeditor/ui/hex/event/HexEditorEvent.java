@@ -24,11 +24,11 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.fife.ui.hex.event;
+package de.bfg9000.hexeditor.ui.hex.event;
 
 import java.util.EventObject;
 
-import org.fife.ui.hex.swing.HexEditor;
+import de.bfg9000.hexeditor.ui.hex.swing.HexEditor;
 
 
 /**

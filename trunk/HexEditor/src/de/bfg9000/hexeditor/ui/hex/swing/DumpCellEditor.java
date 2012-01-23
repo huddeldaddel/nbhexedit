@@ -18,7 +18,7 @@
  * WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.fife.ui.hex.swing;
+package de.bfg9000.hexeditor.ui.hex.swing;
 
 import javax.swing.DefaultCellEditor;
 import javax.swing.JTextField;
@@ -27,6 +27,8 @@ import javax.swing.text.BadLocationException;
 import javax.swing.text.PlainDocument;
 
 class DumpCellEditor extends DefaultCellEditor {
+    
+    private static final long serialVersionUID = 1L;
     
     private EncoderDecoder encoder;
     
@@ -47,6 +49,8 @@ class DumpCellEditor extends DefaultCellEditor {
     
     private static final class EditorField extends JTextField {
         
+        private static final long serialVersionUID = 1L;
+        
         public EditorField() {
             setDocument(new EditorDocument());
         }
@@ -55,12 +59,11 @@ class DumpCellEditor extends DefaultCellEditor {
     
     private static final class EditorDocument extends PlainDocument {
         
+        private static final long serialVersionUID = 1L;
+        
         @Override
         public void insertString(int offset, String str, AttributeSet attr)
                     throws BadLocationException {
-            if(str == null)
-                return;
-
             super.insertString(offset, str, attr);
         }
         
@@ -71,14 +74,14 @@ class DumpCellEditor extends DefaultCellEditor {
         
         @Override
         public void replace(int offset, int length, String text, AttributeSet attrs) throws BadLocationException {
-            if(length == 0 && (text == null || text.length() == 0))
-                return;
-        
+            super.replace(offset, length, text, attrs);
         }
         
     }
     
     private final class ByteConverterDelegate extends EditorDelegate {
+        
+        private static final long serialVersionUID = 1L;
         
         @Override
         public void setValue(Object value) {

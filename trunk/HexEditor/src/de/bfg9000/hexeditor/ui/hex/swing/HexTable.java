@@ -20,7 +20,7 @@
  * TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE 
  * POSSIBILITY OF SUCH DAMAGE.
  */
-package org.fife.ui.hex.swing;
+package de.bfg9000.hexeditor.ui.hex.swing;
 
 import java.awt.*;
 import java.awt.event.FocusEvent;
@@ -34,8 +34,8 @@ import javax.swing.table.TableCellRenderer;
 import javax.swing.table.TableColumn;
 import javax.swing.text.*;
 import javax.swing.undo.UndoManager;
-import org.fife.ui.hex.event.SelectionChangedEvent;
-import org.fife.ui.hex.event.SelectionChangedListener;
+import de.bfg9000.hexeditor.ui.hex.event.SelectionChangedEvent;
+import de.bfg9000.hexeditor.ui.hex.event.SelectionChangedListener;
 
 
 /**

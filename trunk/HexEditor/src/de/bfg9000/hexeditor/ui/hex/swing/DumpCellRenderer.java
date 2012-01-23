@@ -18,54 +18,36 @@
  * WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.fife.ui.hex.swing;
+package de.bfg9000.hexeditor.ui.hex.swing;
 
-import java.io.BufferedReader;
-import java.io.ByteArrayInputStream;
-import java.io.InputStreamReader;
-import java.nio.charset.Charset;
+import java.awt.Component;
+import javax.swing.JLabel;
+import javax.swing.JTable;
+import javax.swing.table.DefaultTableCellRenderer;
 
 /**
- * Encodes an Array of bytes using a named Charset.
+ * Uses an Encoder to encode the byte data of the given cell into a String.
  * 
  * @author Thomas Werner
  */
-class EncoderDecoder {
+class DumpCellRenderer extends DefaultTableCellRenderer {
     
-    private String encoding;
+    private EncoderDecoder encoder;
     
-    public EncoderDecoder() {
-        this(Charset.defaultCharset().name());
+    public DumpCellRenderer(EncoderDecoder encoder) {
+        this.encoder = encoder;
     }
     
-    public EncoderDecoder(String encoding) {
-        this.encoding = encoding;
+    public void setEncoder(EncoderDecoder encoder) {
+        this.encoder = encoder;
     }
     
-    public String encode(Object bytes) {
-        if(!(bytes instanceof byte[]))
-            return "";
-
-        final StringBuilder result = new StringBuilder();
-        BufferedReader br = null;
-        try {
-            final ByteArrayInputStream bais = new ByteArrayInputStream((byte[]) bytes);
-            final InputStreamReader isr = new InputStreamReader(bais, encoding);
-            br = new BufferedReader(isr);
-            while(true) {
-                String line = br.readLine();
-                if(null == line)
-                    break;
-                result.append(line);
-            }
-        } catch(Exception ex) {
-        } finally {
-            if(null != br)
-                try {
-                    br.close();
-                } catch(Exception ex) { }
-        }
-        return result.toString();
+    @Override
+    public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, 
+                     int row, int column) {
+        final JLabel lbl= (JLabel) super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
+        lbl.setText(encoder.encode(value));
+        return lbl;
     }
     
 }

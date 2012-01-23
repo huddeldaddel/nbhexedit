@@ -20,7 +20,7 @@
  * TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE 
  * POSSIBILITY OF SUCH DAMAGE.
  */
-package org.fife.ui.hex.swing;
+package de.bfg9000.hexeditor.ui.hex.swing;
 
 import java.awt.Point;
 import java.io.IOException;
@@ -34,7 +34,7 @@ import javax.swing.undo.AbstractUndoableEdit;
 import javax.swing.undo.CannotRedoException;
 import javax.swing.undo.CannotUndoException;
 import javax.swing.undo.UndoManager;
-import org.fife.ui.hex.ByteBuffer;
+import de.bfg9000.hexeditor.ui.hex.ByteBuffer;
 
 /**
  * The table model used by the <code>JTable</code> in the hex editor.
