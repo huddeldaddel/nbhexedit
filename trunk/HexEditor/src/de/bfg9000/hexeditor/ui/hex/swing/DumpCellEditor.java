@@ -20,6 +20,8 @@
  */
 package de.bfg9000.hexeditor.ui.hex.swing;
 
+import java.util.ArrayList;
+import java.util.List;
 import javax.swing.DefaultCellEditor;
 import javax.swing.JTextField;
 import javax.swing.text.AttributeSet;
@@ -44,7 +46,7 @@ class DumpCellEditor extends DefaultCellEditor {
     
     @Override
     public Object getCellEditorValue() {
-        return null;
+        return delegate.getCellEditorValue();
     }
     
     private static final class EditorField extends JTextField {
@@ -61,14 +63,33 @@ class DumpCellEditor extends DefaultCellEditor {
         
         private static final long serialVersionUID = 1L;
         
+        private ArrayList<Byte> byteData;
+        private EncoderDecoder encoder;
+        
         @Override
         public void insertString(int offset, String str, AttributeSet attr)
                     throws BadLocationException {
-            super.insertString(offset, str, attr);
+            if((byteData != null) && (encoder != null)) {
+                final String start = getText(0, offset);
+                final byte[] toBeAdded = encoder.decode(str);
+                final int byteOffset = encoder.decode(start).length;
+                for(int i=0; i<toBeAdded.length; i++)
+                    byteData.add(byteOffset, toBeAdded[i]);
+            }
+            super.insertString(offset, str, attr);            
         }
         
         @Override
         public void remove(int offs, int len) throws BadLocationException {
+            if((byteData != null) && (encoder != null)) {
+                final String start = getText(0, offs);
+                final String toBeRemoved = getText(offs, len);
+                final int byteOffset = encoder.decode(start).length;
+                final int byteLength = encoder.decode(toBeRemoved).length;
+                for(int i=0; i<byteLength; i++)
+                    byteData.remove(byteOffset);
+            }
+            
             super.remove(offs, len);
         }
         
@@ -85,12 +106,32 @@ class DumpCellEditor extends DefaultCellEditor {
         
         @Override
         public void setValue(Object value) {
-            ((EditorField)editorComponent).setText(encoder.encode(value));
+            final EditorField editor = (EditorField) editorComponent;
+            final EditorDocument document = (EditorDocument)editor.getDocument();
+            editor.setText(encoder.encode(value));
+            document.byteData = toList((byte[]) value);
+            document.encoder = encoder;
         }
 
         @Override
         public Object getCellEditorValue() {
-            return ((EditorField)editorComponent).getText();
+            final EditorField editor = (EditorField) editorComponent;
+            final EditorDocument document = (EditorDocument)editor.getDocument();
+            return toArray(document.byteData);
+        }
+        
+        private byte[] toArray(List<Byte> data) {
+            final byte[] result = new byte[data.size()];
+            for(int i=0; i<data.size(); i++)
+                result[i] = data.get(i);
+            return result;
+        }
+        
+        private ArrayList<Byte> toList(byte[] data) {
+            final ArrayList<Byte> result = new ArrayList<Byte>(data.length);
+            for(int i=0; i<data.length; i++)
+                result.add(data[i]);
+            return result;
         }        
     
     }

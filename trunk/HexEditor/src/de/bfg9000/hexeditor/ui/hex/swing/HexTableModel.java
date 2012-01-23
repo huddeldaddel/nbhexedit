@@ -22,6 +22,7 @@
  */
 package de.bfg9000.hexeditor.ui.hex.swing;
 
+import de.bfg9000.hexeditor.ui.hex.ByteBuffer;
 import java.awt.Point;
 import java.io.IOException;
 import java.io.InputStream;
@@ -34,7 +35,6 @@ import javax.swing.undo.AbstractUndoableEdit;
 import javax.swing.undo.CannotRedoException;
 import javax.swing.undo.CannotUndoException;
 import javax.swing.undo.UndoManager;
-import de.bfg9000.hexeditor.ui.hex.ByteBuffer;
 
 /**
  * The table model used by the <code>JTable</code> in the hex editor.
@@ -295,10 +295,10 @@ class HexTableModel extends AbstractTableModel {
 			// Get ascii dump of entire row
 			offset = editor.cellToOffset(row, 0);
 			if(offset != -1) {
-                final int oldLength = ((String)getValueAt(row, col)).length();
-                final byte[] buffer = ((String)value).getBytes();
+                final int oldLength = ((byte[])getValueAt(row, col)).length;
+                final byte[] buffer = (byte[])value;
                 replaceBytes(offset, oldLength, buffer);
-                if(((String)value).length() == oldLength) {
+                if(((byte[])value).length == oldLength) {
                     fireTableCellUpdated(row, col);
                     fireTableCellUpdated(row, bytesPerRow);
                 } else

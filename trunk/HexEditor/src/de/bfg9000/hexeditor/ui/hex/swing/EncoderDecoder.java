@@ -20,13 +20,11 @@
  */
 package de.bfg9000.hexeditor.ui.hex.swing;
 
-import java.io.BufferedReader;
-import java.io.ByteArrayInputStream;
-import java.io.InputStreamReader;
+import java.io.*;
 import java.nio.charset.Charset;
 
 /**
- * Encodes an Array of bytes using a named Charset.
+ * Performs encoding / decoding between Strings and bytes using various charsets.
  * 
  * @author Thomas Werner
  */
@@ -40,6 +38,27 @@ class EncoderDecoder {
     
     public EncoderDecoder(String encoding) {
         this.encoding = encoding;
+    }
+    
+    public byte[] decode(String text) {
+        if((null == text) || text.isEmpty())
+            return new byte[0];
+        
+        final ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        BufferedWriter bw = null;
+        try {
+            final OutputStreamWriter osw = new OutputStreamWriter(baos, encoding);
+            bw = new BufferedWriter(osw);
+            osw.write(text);
+            bw.flush();
+        } catch(Exception ex) {
+        } finally {
+            if(null != bw)
+                try {
+                    bw.close();
+                } catch(Exception ex) { }
+        }
+        return baos.toByteArray();
     }
     
     public String encode(Object bytes) {
