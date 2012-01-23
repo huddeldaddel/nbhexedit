@@ -18,36 +18,42 @@
  * WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.fife.ui.hex.swing;
+package de.bfg9000.hexeditor.ui.hex.swing;
 
-import java.awt.Component;
-import javax.swing.JLabel;
-import javax.swing.JTable;
-import javax.swing.table.DefaultTableCellRenderer;
+import javax.swing.DefaultCellEditor;
+import javax.swing.JTextField;
+import javax.swing.text.AttributeSet;
+import javax.swing.text.BadLocationException;
+import javax.swing.text.PlainDocument;
 
-/**
- * Uses an Encoder to encode the byte data of the given cell into a String.
- * 
- * @author Thomas Werner
- */
-class DumpCellRenderer extends DefaultTableCellRenderer {
+class ByteCellEditor extends DefaultCellEditor {
     
-    private EncoderDecoder encoder;
-    
-    public DumpCellRenderer(EncoderDecoder encoder) {
-        this.encoder = encoder;
+    public ByteCellEditor() {
+        super(new EditorField());
     }
     
-    public void setEncoder(EncoderDecoder encoder) {
-        this.encoder = encoder;
+    private static final class EditorField extends JTextField {
+        
+        public EditorField() {
+            setDocument(new EditorDocument());
+        }
+        
     }
     
-    @Override
-    public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, 
-                     int row, int column) {
-        final JLabel lbl= (JLabel) super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
-        lbl.setText(encoder.encode(value));
-        return lbl;
+    private static final class EditorDocument extends PlainDocument {
+        
+        private static final String RegEx = "[0-9a-fA-F]";
+        
+        @Override
+        public void insertString(int offset, String str, AttributeSet attr)
+                    throws BadLocationException {
+            if(str == null)
+                return;
+
+            if(((getLength() +str.length()) < 3) && str.matches(RegEx))
+                super.insertString(offset, str, attr);
+        }
+        
     }
     
 }

@@ -23,7 +23,7 @@ package de.bfg9000.hexeditor;
 import java.io.BufferedInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import org.fife.ui.hex.swing.HexEditor;
+import de.bfg9000.hexeditor.ui.hex.swing.HexEditor;
 import org.openide.loaders.DataObject;
 import org.openide.nodes.AbstractNode;
 import org.openide.nodes.Children;

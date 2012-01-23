@@ -20,8 +20,11 @@
  * TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE 
  * POSSIBILITY OF SUCH DAMAGE.
  */
-package org.fife.ui.hex.swing;
+package de.bfg9000.hexeditor.ui.hex.swing;
 
+import de.bfg9000.hexeditor.ui.hex.event.HexEditorEvent;
+import de.bfg9000.hexeditor.ui.hex.event.HexEditorListener;
+import de.bfg9000.hexeditor.ui.hex.event.SelectionChangedListener;
 import java.awt.Color;
 import java.awt.EventQueue;
 import java.awt.Point;
@@ -38,11 +41,6 @@ import java.io.InputStream;
 import java.util.ResourceBundle;
 import javax.swing.*;
 import javax.swing.undo.UndoManager;
-import org.fife.ui.hex.event.HexEditorEvent;
-import org.fife.ui.hex.event.HexEditorListener;
-import org.fife.ui.hex.event.SelectionChangedListener;
-
-
 
 /**
  * A Swing hex editor component.<p>
@@ -102,7 +100,7 @@ public class HexEditor extends JScrollPane {
 	private static final TransferHandler DEFAULT_TRANSFER_HANDLER = new HexEditorTransferHandler();
 
 	static final int DUMP_COLUMN_WIDTH = 200;
-	private static final String MSG = "org.fife.ui.hex.HexEditor";
+	private static final String MSG = "de.bfg9000.hexeditor.ui.hex.HexEditor";
 
 
 	/**
