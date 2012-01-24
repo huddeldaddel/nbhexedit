@@ -601,6 +601,10 @@ class HexTable extends JTable {
         model.setUndoManager(manager);
     }
 
+    String getEncoding() {
+        return encoder.getEncoding();        
+    }
+    
     void setEncoding(String encoding) {
         encoder = new EncoderDecoder(encoding);
         dumpCellEditor.setEncoder(encoder);

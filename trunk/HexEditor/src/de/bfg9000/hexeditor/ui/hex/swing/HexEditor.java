@@ -688,6 +688,10 @@ public class HexEditor extends JScrollPane {
         return result;
     }
 
+    public String getEncoding() {
+        return table.getEncoding();
+    }
+    
     public void setEncoding(String encoding) {
         table.setEncoding(encoding);
     }
