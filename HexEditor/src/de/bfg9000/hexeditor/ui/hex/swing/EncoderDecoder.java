@@ -40,6 +40,10 @@ class EncoderDecoder {
         this.encoding = encoding;
     }
     
+    public String getEncoding() {
+        return encoding;
+    }
+    
     public byte[] decode(String text) {
         if((null == text) || text.isEmpty())
             return new byte[0];
