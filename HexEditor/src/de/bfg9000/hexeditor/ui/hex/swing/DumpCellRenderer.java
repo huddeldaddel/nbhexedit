@@ -27,10 +27,10 @@ import javax.swing.table.DefaultTableCellRenderer;
 
 /**
  * Uses an Encoder to encode the byte data of the given cell into a String.
- * 
- * @author Thomas Werner
  */
 class DumpCellRenderer extends DefaultTableCellRenderer {
+    
+    private static final long serialVersionUID = 1L;
     
     private EncoderDecoder encoder;
     

@@ -74,8 +74,9 @@ class DumpCellEditor extends DefaultCellEditor {
                 final byte[] toBeAdded = encoder.decode(str);
                 final int byteOffset = encoder.decode(start).length;
                 for(int i=0; i<toBeAdded.length; i++)
-                    byteData.add(byteOffset, toBeAdded[i]);
+                    byteData.add(byteOffset +i, toBeAdded[i]);
             }
+            
             super.insertString(offset, str, attr);            
         }
         
